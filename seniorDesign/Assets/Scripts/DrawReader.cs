@@ -35,14 +35,14 @@ public class DrawReader : MonoBehaviour
 		drawing = gameObject.AddComponent<LineRenderer>();
 		//line.material = new Material(Shader.Find("Particles/Additive"));
 		drawing.useWorldSpace = true;
-
+		
 		setUpPlatformTemplate();
 		setUpTrampolineTemplate();
 		drawing.SetVertexCount(0);
 		drawing.SetWidth(0.1f, 0.1f);
 		//line.SetColors(Color.green, Color.green);
 	}
-
+	
 	void Update() 
 	{
 		if(Input.GetMouseButtonDown(0))
@@ -54,12 +54,15 @@ public class DrawReader : MonoBehaviour
 			maxY = float.NegativeInfinity;
 			isMousePressed = true;
 			distance = 0f;
-
+			
 			//line.SetColors(Color.green, Color.green);
 		}
 		else if(Input.GetMouseButtonUp(0))
 		{
+
 			//Create an object if it was drawn correctly and remove the drawing.
+			isMousePressed = false;
+
 			interpretDrawing();
 			drawing.SetVertexCount(0);
 			points.RemoveRange(0, points.Count);
@@ -87,16 +90,16 @@ public class DrawReader : MonoBehaviour
 		{
 			//Get a point from the current mouse position. The camera should be at position (0, 1, -10) and rotation (0, 0, 0).
 			Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
+			
 			mousePos.z = 0f;
-
+			
 			if(!points.Contains(mousePos)) 
 			{
 				//Calculate the distance drawn.
 				if(points.Count > 0)
 				{
 					Vector3 lastPoint = points[points.Count - 1];
-
+					
 					distance += Mathf.Sqrt(Mathf.Pow(mousePos.x - lastPoint.x, 2f) + Mathf.Pow(mousePos.y - lastPoint.y, 2f));
 				}
 
@@ -106,6 +109,7 @@ public class DrawReader : MonoBehaviour
 				drawing.SetPosition(points.Count - 1, points[points.Count - 1]);
 
 				//Recalculate minimum and maximum point values.
+
 				minX = mousePos.x < minX ? mousePos.x : minX;
 				maxX = mousePos.x > maxX ? mousePos.x : maxX;
 				minY = mousePos.y < minY ? mousePos.y : minY;
@@ -133,6 +137,7 @@ public class DrawReader : MonoBehaviour
 	}
 
 	//Compares a drawing to object templates and creates an object if a match is found.
+
 	private void interpretDrawing()
 	{
 		float xLength = maxX - minX;
@@ -140,6 +145,7 @@ public class DrawReader : MonoBehaviour
 		bool horizontal = xLength > yLength;
 		float distanceFromMidpoint = (horizontal ? xLength : yLength) / 2f;
 		Vector2 midpoint = new Vector2((maxX + minX) / 2f, (maxY + minY) / 2f);
+
 		bool[,] grid = setUpGrid();
 
 		//Converts the drawing to grid format for comparison.
@@ -157,12 +163,14 @@ public class DrawReader : MonoBehaviour
 		}
 
 		//Calculates matching scores for each template.
+
 		float[] scores = {compareGrids(grid, platformTemplate) / platformScoreThreshold,
-						  compareGrids(grid, trampolineTemplate) / trampolineScoreThreshold};
+			compareGrids(grid, trampolineTemplate) / trampolineScoreThreshold};
 		int max = -1;
 		float maxScore = 0.8f;
 
 		//Finds the object template with the highest score (initially set high to avoid false positives).
+
 		for(int i = 0; i < scores.Length; i++)
 		{
 			if(scores[i] >= maxScore)
@@ -171,20 +179,21 @@ public class DrawReader : MonoBehaviour
 				max = i;
 			}
 		}
-
+		
 		print("Platform: " + scores[0] + " Trampoline: " + scores[1]);
 
 		//Create the object with the highest score.
+
 		switch(max)
 		{
-			case 0:
-				createPlatform(midpoint);
-				break;
-			case 1:
-				createTrampoline(midpoint);
-				break;
-			default:
-				break;
+		case 0:
+			createPlatform(midpoint);
+			break;
+		case 1:
+			createTrampoline(midpoint);
+			break;
+		default:
+			break;
 		}
 	}
 
@@ -194,13 +203,14 @@ public class DrawReader : MonoBehaviour
 		int score = 0;
 
 		for(int i = 0; i < gridSize; i++)
+
 		{
 			for(int j = 0; j < gridSize; j++)
 			{
 				score += a[i, j] && b[i, j] ? 1 : 0;
 			}
 		}
-
+		
 		return score;
 	}
 
@@ -210,6 +220,7 @@ public class DrawReader : MonoBehaviour
 		GameObject platform = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
 		//Sets platform properties.
+
 		platform.name = "Platform";
 		platform.transform.position = new Vector3(position.x, position.y, 0f);
 		platform.transform.localScale = new Vector3(maxX - minX, 1f, 1f);
@@ -302,7 +313,7 @@ public class DrawReader : MonoBehaviour
 				grid[i, j] = false;
 			}
 		}
-
+		
 		return grid;
 	}
 }
