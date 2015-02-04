@@ -1,0 +1,33 @@
+using UnityEngine;
+using System.Collections;
+
+public class playerAI : MonoBehaviour {
+	
+	private float speed = 5;
+
+	Vector3 target;
+
+	void Start ()
+	{
+		target = transform.position;
+	}
+
+	// Update is called once per frame
+	void Update () {
+			
+			//if mouse is clicked or held down
+			if (Input.GetKeyDown (KeyCode.Mouse0)) {
+						//get vector position of mouse click
+						target = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+						
+						//keep z value constant according to the transform.positoin.z, ALWAYS -10
+						target.z = transform.position.z;
+						
+						//to keep the player moving only in the x-axis when mouse clicked
+						target.y = 0;
+				}
+			
+			transform.position = Vector3.MoveTowards(transform.position, target, speed * Time.deltaTime); 
+		//Debug.Log (Camera.main.ScreenToWorldPoint (Input.mousePosition));
+	}
+}
