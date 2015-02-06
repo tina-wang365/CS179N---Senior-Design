@@ -21,7 +21,6 @@ public class spawner : MonoBehaviour {
 			other.gameObject.transform.position = new Vector3(x, y, z);
 			other.gameObject.rigidbody.velocity = new Vector3(0, 0, 0);
 		}
-
 	}
 
 }
