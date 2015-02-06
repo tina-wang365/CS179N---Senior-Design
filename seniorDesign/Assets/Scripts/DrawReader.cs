@@ -39,7 +39,7 @@ public class DrawReader : MonoBehaviour
 		setUpPlatformTemplate();
 		setUpTrampolineTemplate();
 		drawing.SetVertexCount(0);
-		drawing.SetWidth(0.1f, 0.1f);
+		drawing.SetWidth(0.5f, 0.5f);
 		//line.SetColors(Color.green, Color.green);
 	}
 	
