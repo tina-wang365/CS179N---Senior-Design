@@ -1,7 +1,7 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 
-public class PlayerController : MonoBehaviour
+public class AIScript : MonoBehaviour
 {
 	bool onGround = true; // global variable, bool variable that says if player is on ground or not
 	float moveDirection = 1.0f; // true if the player is moving forward (to the right)
@@ -30,13 +30,23 @@ public class PlayerController : MonoBehaviour
 	void Jump()
 	{
 		onGround = false;
-
-		float JumpSpeed = 700.0f;
+		float JumpSpeed = 300.0f;
 		float forceX = 150.0f;
 		
 		rigidbody.AddForce (Vector3.up * JumpSpeed);
 		rigidbody.AddForce (moveDirection * forceX, 0.0f, 0.0f);
 	}
+
+//	void Update ()
+//	{
+//		if(GameObject.Find ("Platform"))
+//		{
+//			//this works to find when a platform is created
+//			//Debug.Log("got one");
+//			//if there is a platform created Jump to it
+//			Jump ();
+//		}
+//	}
 	
 	// update function
 	void FixedUpdate()
@@ -50,14 +60,14 @@ public class PlayerController : MonoBehaviour
 		if(onGround)
 		{
 			//Added conditoin to check if the player is at the Edge, then you CANNOT move
-//			if(atEdge)
-//			{
-//				//set player velocity to ZERO
-//				rigidbody.velocity = Vector3.zero;
-//			}
-
+			if(atEdge)
+			{
+				//set player velocity to ZERO
+				rigidbody.velocity = Vector3.zero;
+			}
+			
 			//otherwise you are not at the edge and you can left or right
-			//else{
+			else{
 				// position updated for left/right movement
 				Vector3 movement = new Vector3 (moveHorizontal * moveSpeed, 0.0f, 0.0f);
 				Vector3 newPosition = new Vector3 (transform.position.x + movement.x, transform.position.y, transform.position.z);
@@ -73,8 +83,8 @@ public class PlayerController : MonoBehaviour
 				}
 				//remove this, I believe we dont need it if the player is on the ground
 				//groundHeight = transform.position.y; // gets the height of the ground the player is on
-			//}
-
+			}
+			
 //			if(GameObject.Find ("Platform"))
 //			{
 //				//this works to find when a platform is created
@@ -89,18 +99,18 @@ public class PlayerController : MonoBehaviour
 		{
 			Jump();
 			//onGround = false; // player is not on ground for duration of the jump
-			//atEdge = false;
+			atEdge = false;
 		}
 	}
-
+	
 	//OntriggerEnter function to check when the player has reached the edge
-//	void OnTriggerEnter(Collider other)
-//	{
-//		if(other.gameObject.tag == "edge")
-//		{
-//			atEdge = true;
-//			//rigidbody.velocity = Vector3.zero;
-//			//Debug.Log ("player is WITHIN EDGE!\n");
-//		}
-//	}
+	void OnTriggerEnter(Collider other)
+	{
+		if(other.gameObject.tag == "edge")
+		{
+			atEdge = true;
+			//rigidbody.velocity = Vector3.zero;
+			//Debug.Log ("player is WITHIN EDGE!\n");
+		}
+	}
 }
