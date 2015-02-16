@@ -3,6 +3,7 @@ using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
+	public float x, y, z;
 	bool onGround = true; // global variable, bool variable that says if player is on ground or not
 	float moveDirection = 1.0f; // true if the player is moving forward (to the right)
 	float positionBeforeMove = 0.0f;
@@ -12,17 +13,16 @@ public class PlayerController : MonoBehaviour
 	void OnCollisionEnter (Collision collider)
 	{
 		// removes forces from acting on player if the player touches the ground
-		if((collider.gameObject.name.IndexOf("Floor") != -1 || collider.gameObject.name.IndexOf("Platform") != -1) && !onGround)
+		if ((collider.gameObject.name.IndexOf ("Floor") != -1 || collider.gameObject.name.IndexOf ("Platform") != -1 
+		     || collider.gameObject.name.IndexOf ("platform") != -1) && !onGround)
 		{
 			rigidbody.velocity = Vector3.zero;
 			rigidbody.angularVelocity = Vector3.zero;
 			onGround = true;
 		}
-		
-		// puts player back at start if the player hits spikes
 		if(collider.gameObject.name.IndexOf("spike") != -1)
 		{
-			/* CODE TO START POSITION HERE */
+
 		}
 	}
 	

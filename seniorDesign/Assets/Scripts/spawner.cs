@@ -5,6 +5,7 @@ using System;
 public class spawner : MonoBehaviour {
 	//setup position of where to spawn
 	public float x, y, z;
+	public bool levelEnd = false;
 	//setup public variable to represent which trigger activated
 	void Start()
 	{
@@ -21,7 +22,5 @@ public class spawner : MonoBehaviour {
 			other.gameObject.transform.position = new Vector3(x, y, z);
 			other.gameObject.rigidbody.velocity = new Vector3(0, 0, 0);
 		}
-
 	}
-
 }
