@@ -133,9 +133,23 @@ public class DrawReader : MonoBehaviour
 		platform.GetComponent<MeshRenderer>().material.color = platformColor;
 		platform.transform.position = new Vector3((points[points.Count - 1].x + points[0].x) / 2f, (points[points.Count - 1].y + points[0].y) / 2f, 0f);
 		platform.transform.localScale = new Vector3(length, 3f, 30f);
-		//platform.GetComponent<BoxCollider>().transform.localScale = new Vector3(1f, 1.1f, 1f);
+		addWaypoint(platform); 
 		platform.transform.Rotate(0f, 0f, Mathf.Abs(angle) > 5.0 ? angle : 0f);
 		addObject(platform, platforms, maxPlatforms);
+	}
+
+	private void addWaypoint(GameObject platform)
+	{
+		GameObject waypoint = GameObject.CreatePrimitive(PrimitiveType.Cube);
+
+		Destroy(waypoint.rigidbody);
+		Destroy(waypoint.renderer);
+
+		waypoint.name = "Waypoint";
+		waypoint.transform.position = platform.transform.position + new Vector3(0f, platform.transform.localScale.y / 1.5f, 0f);
+		waypoint.transform.localScale = new Vector3(1f, 1f, platform.transform.localScale.z);
+		waypoint.transform.parent = platform.transform;
+		waypoint.collider.isTrigger = true;
 	}
 
 	//Adds a drawn object to the specified list.
