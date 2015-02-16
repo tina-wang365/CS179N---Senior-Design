@@ -24,6 +24,15 @@ public class PlayerController : MonoBehaviour
 		{
 
 		}
+
+		if(collider.gameObject.name.Equals("Platform") && collider.gameObject.GetComponent<MeshRenderer>().material.color.Equals(Color.blue))
+		{
+			float angle = Mathf.Deg2Rad * collider.gameObject.transform.rotation.eulerAngles.z + Mathf.PI / 2f;
+			Vector3 direction = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f).normalized;
+
+			//rigidbody.velocity = direction * 100f;
+			rigidbody.AddForce(direction * 5000f);
+		}
 	}
 	
 	// character jump function

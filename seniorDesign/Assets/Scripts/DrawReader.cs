@@ -8,7 +8,6 @@ public class DrawReader : MonoBehaviour
 	private bool isMousePressed;
 	private List<Vector3> points;
 	private List<GameObject> platforms;
-	private float distance;
 	private Color platformColor;
 	public float maxDistance;
 	public int maxPlatforms;
@@ -21,7 +20,6 @@ public class DrawReader : MonoBehaviour
 		isMousePressed = false;
 		line = gameObject.AddComponent<LineRenderer>();
 		platformColor = Color.white;
-
 		line.material = new Material(Shader.Find("Particles/Additive"));
 		line.useWorldSpace = true;
 
@@ -34,7 +32,6 @@ public class DrawReader : MonoBehaviour
 		if(Input.GetMouseButtonDown(0))
 		{
 			isMousePressed = true;
-			distance = 0f;
 			
 			line.SetColors(platformColor, platformColor);
 			line.SetVertexCount(2);
@@ -74,11 +71,7 @@ public class DrawReader : MonoBehaviour
 			
 			if(!points.Contains(mousePos)) 
 			{
-				//Calculate the distance drawn.
-				if(points.Count > 0)
-				{
-					distance = Mathf.Sqrt(Mathf.Pow(mousePos.x - points[0].x, 2f) + Mathf.Pow(mousePos.y - points[0].y, 2f));
-				}
+				float distance = points.Count > 0 ? Mathf.Sqrt(Mathf.Pow(mousePos.x - points[0].x, 2f) + Mathf.Pow(mousePos.y - points[0].y, 2f)) : 0f;
 
 				if(points.Count == 2)
 				{
@@ -93,6 +86,7 @@ public class DrawReader : MonoBehaviour
 				{
 					float x = mousePos.x - points[0].x;
 					float angle = Mathf.Atan((mousePos.y - points[0].y) / x) + (x < 0f ? Mathf.PI : 0f);
+
 					points.Add(new Vector3(Mathf.Cos(angle) * maxDistance + points[0].x, Mathf.Sin(angle) * maxDistance + points[0].y, 0f));
 				}
 
@@ -139,6 +133,7 @@ public class DrawReader : MonoBehaviour
 		platform.GetComponent<MeshRenderer>().material.color = platformColor;
 		platform.transform.position = new Vector3((points[points.Count - 1].x + points[0].x) / 2f, (points[points.Count - 1].y + points[0].y) / 2f, 0f);
 		platform.transform.localScale = new Vector3(length, 3f, 30f);
+		//platform.GetComponent<BoxCollider>().transform.localScale = new Vector3(1f, 1.1f, 1f);
 		platform.transform.Rotate(0f, 0f, Mathf.Abs(angle) > 5.0 ? angle : 0f);
 		addObject(platform, platforms, maxPlatforms);
 	}
