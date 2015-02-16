@@ -4,67 +4,46 @@ using System.Collections.Generic;
 
 public class DrawReader : MonoBehaviour
 {
-	private LineRenderer drawing;
+	private LineRenderer line;
 	private bool isMousePressed;
 	private List<Vector3> points;
 	private List<GameObject> platforms;
-	private List<GameObject> trampolines;
-	private bool[,] platformTemplate;
-	private bool[,] trampolineTemplate;
-	private float platformScoreThreshold = 5f;
-	private float trampolineScoreThreshold = 6f;
-	private float minX;
-	private float maxX;
-	private float minY;
-	private float maxY;
 	private float distance;
-	private int gridSize = 5;
-	private int halfGridSize;
+	private Color platformColor;
 	public float maxDistance;
 	public int maxPlatforms;
-	public int maxTrampolines;
 	public GameObject player;
 
 	void Awake()
 	{
-		halfGridSize = gridSize / 2;
 		points = new List<Vector3>();
 		platforms = new List<GameObject>();
-		trampolines = new List<GameObject>();
 		isMousePressed = false;
-		drawing = gameObject.AddComponent<LineRenderer>();
-		//line.material = new Material(Shader.Find("Particles/Additive"));
-		drawing.useWorldSpace = true;
-		
-		setUpPlatformTemplate();
-		setUpTrampolineTemplate();
-		drawing.SetVertexCount(0);
-		drawing.SetWidth(0.5f, 0.5f);
-		//line.SetColors(Color.green, Color.green);
+		line = gameObject.AddComponent<LineRenderer>();
+		platformColor = Color.white;
+
+		line.material = new Material(Shader.Find("Particles/Additive"));
+		line.useWorldSpace = true;
+
+		line.SetVertexCount(0);
+		line.SetWidth(0.5f, 0.5f);
 	}
 	
 	void Update() 
 	{
 		if(Input.GetMouseButtonDown(0))
 		{
-			//Set initial min/max drawing point values.
-			minX = float.PositiveInfinity;
-			maxX = float.NegativeInfinity;
-			minY = float.PositiveInfinity;
-			maxY = float.NegativeInfinity;
 			isMousePressed = true;
 			distance = 0f;
 			
-			//line.SetColors(Color.green, Color.green);
+			line.SetColors(platformColor, platformColor);
+			line.SetVertexCount(2);
 		}
 		else if(Input.GetMouseButtonUp(0))
 		{
-
 			//Create an object if it was drawn correctly and remove the drawing.
-			isMousePressed = false;
-
-			interpretDrawing();
-			drawing.SetVertexCount(0);
+			createPlatform();
+			line.SetVertexCount(0);
 			points.RemoveRange(0, points.Count);
 
 			isMousePressed = false;
@@ -78,7 +57,7 @@ public class DrawReader : MonoBehaviour
 			//If the ray hit something, delete it.
 			if(Physics.Raycast(camRay, out hit) && hit.collider != null)
 			{
-				if(removeClicked(hit, platforms) || removeClicked(hit, trampolines))
+				if(removeClicked(hit, platforms))
 				{
 					//Display error message?
 				}
@@ -86,7 +65,7 @@ public class DrawReader : MonoBehaviour
 		}
 
 		//Add points to the drawing while the left mouse button is down.
-		if(isMousePressed && distance < maxDistance)
+		if(isMousePressed)
 		{
 			//Get a point from the current mouse position. The camera should be at position (0, 1, -10) and rotation (0, 0, 0).
 			Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -98,22 +77,27 @@ public class DrawReader : MonoBehaviour
 				//Calculate the distance drawn.
 				if(points.Count > 0)
 				{
-					Vector3 lastPoint = points[points.Count - 1];
-					
-					distance += Mathf.Sqrt(Mathf.Pow(mousePos.x - lastPoint.x, 2f) + Mathf.Pow(mousePos.y - lastPoint.y, 2f));
+					distance = Mathf.Sqrt(Mathf.Pow(mousePos.x - points[0].x, 2f) + Mathf.Pow(mousePos.y - points[0].y, 2f));
 				}
 
-				//Add point to the drawing.
-				points.Add(mousePos);
-				drawing.SetVertexCount(points.Count);
-				drawing.SetPosition(points.Count - 1, points[points.Count - 1]);
+				if(points.Count == 2)
+				{
+					points.RemoveAt(1);
+				}
 
-				//Recalculate minimum and maximum point values.
+				if(distance < maxDistance)
+				{
+					points.Add(mousePos);
+				}
+				else
+				{
+					float x = mousePos.x - points[0].x;
+					float angle = Mathf.Atan((mousePos.y - points[0].y) / x) + (x < 0f ? Mathf.PI : 0f);
+					points.Add(new Vector3(Mathf.Cos(angle) * maxDistance + points[0].x, Mathf.Sin(angle) * maxDistance + points[0].y, 0f));
+				}
 
-				minX = mousePos.x < minX ? mousePos.x : minX;
-				maxX = mousePos.x > maxX ? mousePos.x : maxX;
-				minY = mousePos.y < minY ? mousePos.y : minY;
-				maxY = mousePos.y > maxY ? mousePos.y : maxY;
+				line.SetPosition(0, points[0]);
+				line.SetPosition(1, points[points.Count - 1]);
 			}
 		}
 	}
@@ -136,109 +120,27 @@ public class DrawReader : MonoBehaviour
 		return false;
 	}
 
-	//Compares a drawing to object templates and creates an object if a match is found.
-
-	private void interpretDrawing()
-	{
-		float xLength = maxX - minX;
-		float yLength = maxY - minY;
-		bool horizontal = xLength > yLength;
-		float distanceFromMidpoint = (horizontal ? xLength : yLength) / 2f;
-		Vector2 midpoint = new Vector2((maxX + minX) / 2f, (maxY + minY) / 2f);
-
-		bool[,] grid = setUpGrid();
-
-		//Converts the drawing to grid format for comparison.
-		foreach(Vector3 point in points)
-		{
-			int x = halfGridSize + (int) (((float) halfGridSize) * (point.x - midpoint.x) / distanceFromMidpoint);
-			int y = halfGridSize + (int) (((float) halfGridSize) * (point.y - midpoint.y) / distanceFromMidpoint);
-
-			if(x < 0 || y < 0 || x > gridSize - 1 || y > gridSize - 1)
-			{
-				return;
-			}
-
-			grid[x, y] = true;
-		}
-
-		//Calculates matching scores for each template.
-
-		float[] scores = {compareGrids(grid, platformTemplate) / platformScoreThreshold,
-			compareGrids(grid, trampolineTemplate) / trampolineScoreThreshold};
-		int max = -1;
-		float maxScore = 0.8f;
-
-		//Finds the object template with the highest score (initially set high to avoid false positives).
-
-		for(int i = 0; i < scores.Length; i++)
-		{
-			if(scores[i] >= maxScore)
-			{
-				maxScore = scores[i];
-				max = i;
-			}
-		}
-		
-		print("Platform: " + scores[0] + " Trampoline: " + scores[1]);
-
-		//Create the object with the highest score.
-
-		switch(max)
-		{
-		case 0:
-			createPlatform(midpoint);
-			break;
-		case 1:
-			createTrampoline(midpoint);
-			break;
-		default:
-			break;
-		}
-	}
-
-	//Compares two grids and returns a score based on their similarity.
-	private int compareGrids(bool[,] a, bool[,] b)
-	{
-		int score = 0;
-
-		for(int i = 0; i < gridSize; i++)
-
-		{
-			for(int j = 0; j < gridSize; j++)
-			{
-				score += a[i, j] && b[i, j] ? 1 : 0;
-			}
-		}
-		
-		return score;
-	}
-
 	//Creates a platform at the specified position.
-	private void createPlatform(Vector2 position)
+	private void createPlatform()
 	{
+		if(points.Count < 2)
+		{
+			return;
+		}
+
 		GameObject platform = GameObject.CreatePrimitive(PrimitiveType.Cube);
+		float opp = points [points.Count - 1].y - points [0].y;
+		float adj = points [points.Count - 1].x - points [0].x;
+		float length = Mathf.Sqrt(Mathf.Pow(adj, 2f) + Mathf.Pow(opp, 2f));
+		float angle = Mathf.Atan(opp / adj) * 180f / Mathf.PI;
 
 		//Sets platform properties.
-
 		platform.name = "Platform";
-		platform.transform.position = new Vector3(position.x, position.y, 0f);
-		platform.transform.localScale = new Vector3(maxX - minX, 1f, 1f);
-
+		platform.GetComponent<MeshRenderer>().material.color = platformColor;
+		platform.transform.position = new Vector3((points[points.Count - 1].x + points[0].x) / 2f, (points[points.Count - 1].y + points[0].y) / 2f, 0f);
+		platform.transform.localScale = new Vector3(length, 3f, 30f);
+		platform.transform.Rotate(0f, 0f, Mathf.Abs(angle) > 5.0 ? angle : 0f);
 		addObject(platform, platforms, maxPlatforms);
-	}
-
-	//Creates a trampoline at the speficied position.
-	private void createTrampoline(Vector2 position)
-	{
-		GameObject trampoline = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-
-		//Sets trampoline properties.
-		trampoline.name = "Trampoline";
-		trampoline.transform.position = new Vector3(position.x, position.y, 0f);
-		trampoline.transform.localScale = new Vector3(maxX - minX, 0.1f, maxX - minX);
-
-		addObject(trampoline, trampolines, maxTrampolines);
 	}
 
 	//Adds a drawn object to the specified list.
@@ -274,46 +176,21 @@ public class DrawReader : MonoBehaviour
 		return false;
 	}
 
-	//Sets up the grid template for a platform.
-	private void setUpPlatformTemplate()
+	public void setColor(string color)
 	{
-		platformTemplate = setUpGrid();
-
-		//Creates a horizontal line in the grid.
-		for(int i = 0; i < gridSize; i++)
+		switch(color)
 		{
-			platformTemplate[i, halfGridSize] = true;
+			case "White":
+				platformColor = Color.white;
+				break;
+			case "Red":
+				platformColor = Color.red;
+				break;
+			case "Blue":
+				platformColor = Color.blue;
+				break;
+			default:
+				break;
 		}
-	}
-
-	//Sets up the grid template for a trampoline.
-	private void setUpTrampolineTemplate()
-	{
-		trampolineTemplate = setUpGrid();
-
-		float intervals = (float) (gridSize * gridSize);
-
-		//Creates a circle in the grid.
-		for(float i = 0f; i < intervals; i++)
-		{
-			trampolineTemplate[halfGridSize + (int) (((float) halfGridSize) * Mathf.Cos(i * 2f * Mathf.PI / intervals)),
-				halfGridSize + (int) (((float) halfGridSize) * Mathf.Sin(i * 2f * Mathf.PI / intervals))] = true;
-		}
-	}
-
-	//Creates a "blank" grid template.
-	private bool[,] setUpGrid()
-	{
-		bool[,] grid = new bool[gridSize, gridSize];
-
-		for(int i = 0; i < gridSize; i++)
-		{
-			for(int j = 0; j < gridSize; j++)
-			{
-				grid[i, j] = false;
-			}
-		}
-		
-		return grid;
 	}
 }
