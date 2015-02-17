@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class PlayerController : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class PlayerController : MonoBehaviour
 	float moveDirection = 1.0f; // true if the player is moving forward (to the right)
 	float positionBeforeMove = 0.0f;
 	//bool atEdge = false; //global variable, bool var to detect when the player is on edge
+	List<GameObject> platforms = new List<GameObject>();
 	
 	// collision detection between player and various objects
 	void OnCollisionEnter (Collision collider)
@@ -34,7 +36,17 @@ public class PlayerController : MonoBehaviour
 			rigidbody.AddForce(direction * 5000f);
 		}
 	}
-	
+
+	public void addPlatform(GameObject platform)
+	{
+		platforms.Add(platform);
+	}
+
+	public void removePlatform(GameObject platform)
+	{
+		platforms.Remove(platform);
+	}
+
 	// character jump function
 	void Jump()
 	{

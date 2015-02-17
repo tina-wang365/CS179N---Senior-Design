@@ -106,6 +106,7 @@ public class DrawReader : MonoBehaviour
 			{
 				//Removes and destroys the right-clicked object.
 				list.Remove(gameObject);
+				player.GetComponent<PlayerController>().removePlatform(gameObject);
 				Destroy(gameObject);
 				return true;
 			}
@@ -168,6 +169,10 @@ public class DrawReader : MonoBehaviour
 				
 				list.Remove(oldGameObject);
 				Destroy(oldGameObject);
+			}
+			else
+			{
+				player.GetComponent<PlayerController>().addPlatform(gameObject);
 			}
 		}
 	}
