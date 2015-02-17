@@ -161,6 +161,7 @@ public class DrawReader : MonoBehaviour
 		{
 			//Adds the object to the list.
 			list.Add(gameObject);
+			player.GetComponent<PlayerController>().addPlatform(gameObject);
 
 			//Deletes the oldest object in the list if the list contains too many objects.
 			if(list.Count > max)
@@ -168,11 +169,8 @@ public class DrawReader : MonoBehaviour
 				GameObject oldGameObject = list[0];
 				
 				list.Remove(oldGameObject);
+				player.GetComponent<PlayerController>().removePlatform(oldGameObject);
 				Destroy(oldGameObject);
-			}
-			else
-			{
-				player.GetComponent<PlayerController>().addPlatform(gameObject);
 			}
 		}
 	}
