@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class pickup : MonoBehaviour {
+public class Pickup : MonoBehaviour {
 	public bool levelRestart = false;
 	public bool isActive = true;
 	// Use this for initialization

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 public class PlayerController : MonoBehaviour
 {
-	public float x, y, z;
 	bool onGround = true; // global variable, bool variable that says if player is on ground or not
 	float moveDirection = 1.0f; // true if the player is moving forward (to the right)
 	float positionBeforeMove = 0.0f;
