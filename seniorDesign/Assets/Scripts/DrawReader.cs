@@ -40,7 +40,7 @@ public class DrawReader : MonoBehaviour
 			disableButton("BlueButton");
 		}
 
-		if(!enableRed && !enableRed)
+		if(!enableRed && !enableBlue)
 		{
 			disableButton("WhiteButton");
 		}
