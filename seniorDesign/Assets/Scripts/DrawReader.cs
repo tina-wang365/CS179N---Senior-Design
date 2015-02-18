@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -11,7 +12,10 @@ public class DrawReader : MonoBehaviour
 	private Color platformColor;
 	public float maxDistance;
 	public int maxPlatforms;
+	public bool enableBlue;
+	public bool enableRed;
 	public GameObject player;
+	public GameObject canvas;
 
 	void Awake()
 	{
@@ -25,6 +29,21 @@ public class DrawReader : MonoBehaviour
 
 		line.SetVertexCount(0);
 		line.SetWidth(0.5f, 0.5f);
+
+		if(!enableRed)
+		{
+			disableButton("RedButton");
+		}
+
+		if(!enableBlue)
+		{
+			disableButton("BlueButton");
+		}
+
+		if(!enableRed && !enableRed)
+		{
+			disableButton("WhiteButton");
+		}
 	}
 	
 	void Update() 
@@ -92,6 +111,35 @@ public class DrawReader : MonoBehaviour
 
 				line.SetPosition(0, points[0]);
 				line.SetPosition(1, points[points.Count - 1]);
+			}
+		}
+	}
+
+	private void disableButton(string name)
+	{
+		for(int i = 0; i < canvas.GetComponent<RectTransform>().childCount; i++)
+		{
+			Transform button = canvas.GetComponent<RectTransform>().GetChild(i);
+
+			if(button.name.Equals(name))
+			{
+				button.GetComponent<Button>().interactable = false;
+				button.GetComponent<Image>().enabled = false;
+				break;
+			}
+		}
+	}
+
+	private void repositionButton(string name)
+	{
+		for(int i = 0; i < canvas.GetComponent<RectTransform>().childCount; i++)
+		{
+			Transform button = canvas.GetComponent<RectTransform>().GetChild(i);
+			
+			if(button.name.Equals(name))
+			{
+				button.position.Set(button.position.x + 30f, button.position.y, button.position.z);
+				break;
 			}
 		}
 	}
