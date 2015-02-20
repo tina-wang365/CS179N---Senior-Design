@@ -29,10 +29,26 @@ public class PlayerController : MonoBehaviour
 		if(collider.gameObject.name.Equals("Platform") && collider.gameObject.GetComponent<MeshRenderer>().material.color.Equals(Color.blue))
 		{
 			float angle = Mathf.Deg2Rad * collider.gameObject.transform.rotation.eulerAngles.z + Mathf.PI / 2f;
-			Vector3 direction = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f).normalized;
+			Vector3 direction = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f);
+
+			foreach(ContactPoint contact in collider.contacts)
+			{
+				if(contact.normal == direction)
+				{
+					//rigidbody.velocity = direction * 100f;
+					rigidbody.AddForce(direction * 5000f);
+					break;
+				}
+			}
+		}
+		else if(collider.gameObject.name.Equals("Platform") && collider.gameObject.GetComponent<MeshRenderer>().material.color.Equals(Color.red))
+		{
+			float angle = Mathf.Deg2Rad * collider.gameObject.transform.rotation.eulerAngles.z;
+			Vector3 direction = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f);
+			Vector3 position = collider.contacts[0].point - collider.gameObject.GetComponent<Transform>().position;
 
 			//rigidbody.velocity = direction * 100f;
-			rigidbody.AddForce(direction * 5000f);
+			rigidbody.AddForce((Vector3.Dot(position, direction) < 0f ? 1f : -1f) * direction * 5000f);
 		}
 	}
 
