@@ -30,24 +30,36 @@ public class DrawReader : MonoBehaviour
 		line.SetVertexCount(0);
 		line.SetWidth(0.5f, 0.5f);
 
+		//Disables the red button if specified by its corresponding public variable.
 		if(!enableRed)
 		{
 			disableButton("RedButton");
 		}
 
+		//Disables the blue button if specified by its corresponding public variable.
 		if(!enableBlue)
 		{
 			disableButton("BlueButton");
 		}
 
+		//Disables the white button if the other two buttons have both been disabled.
 		if(!enableRed && !enableBlue)
 		{
 			disableButton("WhiteButton");
 		}
 	}
-	
+
 	void Update() 
 	{
+		//Disables the platform's light if its initial particle animation has stopped.
+		foreach(GameObject platform in platforms)
+		{
+			if(platform.particleSystem.isStopped)
+			{
+				platform.light.range = 0f;
+			}
+		}
+
 		if(Input.GetMouseButtonDown(0))
 		{
 			isMousePressed = true;
@@ -73,7 +85,7 @@ public class DrawReader : MonoBehaviour
 			//If the ray hit something, delete it.
 			if(Physics.Raycast(camRay, out hit) && hit.collider != null)
 			{
-				if(removeClicked(hit, platforms))
+				if(removeClicked(hit))
 				{
 					//Display error message?
 				}
@@ -90,13 +102,16 @@ public class DrawReader : MonoBehaviour
 			
 			if(!points.Contains(mousePos)) 
 			{
+				//Calculates the distance between the mouse position and the first point.
 				float distance = points.Count > 0 ? Mathf.Sqrt(Mathf.Pow(mousePos.x - points[0].x, 2f) + Mathf.Pow(mousePos.y - points[0].y, 2f)) : 0f;
 
+				//Removes the second point so it can be replaced.
 				if(points.Count == 2)
 				{
 					points.RemoveAt(1);
 				}
 
+				//Adds the furthest valid point to the list of points.
 				if(distance < maxDistance)
 				{
 					points.Add(mousePos);
@@ -109,18 +124,33 @@ public class DrawReader : MonoBehaviour
 					points.Add(new Vector3(Mathf.Cos(angle) * maxDistance + points[0].x, Mathf.Sin(angle) * maxDistance + points[0].y, 0f));
 				}
 
+				//Sets the line's position based on the current points.
 				line.SetPosition(0, points[0]);
 				line.SetPosition(1, points[points.Count - 1]);
 			}
 		}
 	}
 
+	void FixedUpdate()
+	{
+		//Modified and activates the particle system of the next platform to be deleted.
+		if(platforms.Count == maxPlatforms && maxPlatforms > 0 && platforms[0].particleSystem.isStopped)
+		{
+			platforms[0].particleSystem.emissionRate = 10f;
+			platforms[0].particleSystem.playbackSpeed = 1f;
+			platforms[0].particleSystem.startSize = 1f;
+			platforms[0].particleSystem.Play();
+		}
+	}
+
+	//Disables a UI button.
 	private void disableButton(string name)
 	{
 		for(int i = 0; i < canvas.GetComponent<RectTransform>().childCount; i++)
 		{
 			Transform button = canvas.GetComponent<RectTransform>().GetChild(i);
 
+			//Disables the button with the specified name.
 			if(button.name.Equals(name))
 			{
 				button.GetComponent<Button>().interactable = false;
@@ -130,32 +160,18 @@ public class DrawReader : MonoBehaviour
 		}
 	}
 
-	private void repositionButton(string name)
+	//Removes a platform when right-clicked.
+	private bool removeClicked(RaycastHit hit)
 	{
-		for(int i = 0; i < canvas.GetComponent<RectTransform>().childCount; i++)
+		//Searches the list of platforms for the one that was right-clicked.
+		foreach(GameObject platform in platforms)
 		{
-			Transform button = canvas.GetComponent<RectTransform>().GetChild(i);
-			
-			if(button.name.Equals(name))
+			if(hit.collider.Equals(platform.collider))
 			{
-				button.position.Set(button.position.x + 30f, button.position.y, button.position.z);
-				break;
-			}
-		}
-	}
-
-	//Removes a drawn object when right-clicked.
-	private bool removeClicked(RaycastHit hit, List<GameObject> list)
-	{
-		//Checks each game object in the list for the object that was right-clicked.
-		foreach(GameObject gameObject in list)
-		{
-			if(hit.collider.Equals(gameObject.collider))
-			{
-				//Removes and destroys the right-clicked object.
-				list.Remove(gameObject);
-				player.GetComponent<PlayerController>().removePlatform(gameObject);
-				Destroy(gameObject);
+				//Removes and destroys the right-clicked platform.
+				platforms.Remove(platform);
+				player.GetComponent<PlayerController>().removePlatform(platform);
+				Destroy(platform);
 				return true;
 			}
 		}
@@ -166,11 +182,25 @@ public class DrawReader : MonoBehaviour
 	//Creates a platform at the specified position.
 	private void createPlatform()
 	{
+		//If fewer that two points are in the list of points, no platform is created.
 		if(points.Count < 2)
 		{
 			return;
 		}
 
+		//If the left mouse button was let go over a button, no platform is created.
+		for(int i = 0; i < canvas.GetComponent<RectTransform>().childCount; i++)
+		{
+			Transform button = canvas.GetComponent<RectTransform>().GetChild(i);
+			Vector3 position = Camera.main.ScreenToWorldPoint(button.position);
+
+			if(Mathf.Sqrt(Mathf.Pow(points[1].x - position.x, 2f) + Mathf.Pow(points[1].y - position.y, 2f)) < 3f)
+			{
+				return;
+			}
+		}
+
+		//Creates a platform and determines its size and orientation.
 		GameObject platform = GameObject.CreatePrimitive(PrimitiveType.Cube);
 		float opp = points [points.Count - 1].y - points [0].y;
 		float adj = points [points.Count - 1].x - points [0].x;
@@ -179,21 +209,38 @@ public class DrawReader : MonoBehaviour
 
 		//Sets platform properties.
 		platform.name = "Platform";
+		platform.AddComponent<ParticleSystem>();
+		platform.particleSystem.loop = false;
+		platform.particleSystem.startLifetime = 1f;
+		platform.particleSystem.emissionRate = 10f * length;
+		platform.particleSystem.playbackSpeed = 25f;
+		platform.particleSystem.startSize = 10f;
+		platform.particleSystem.startColor = platformColor;
+		platform.AddComponent<Light>();
+		platform.light.color = platformColor;
+		platform.light.type = LightType.Point;
+		platform.light.intensity = 2f;
+		platform.light.range = 100f;
 		platform.GetComponent<MeshRenderer>().material.color = platformColor;
 		platform.transform.position = new Vector3((points[points.Count - 1].x + points[0].x) / 2f, (points[points.Count - 1].y + points[0].y) / 2f, 0f);
 		platform.transform.localScale = new Vector3(length, 3f, 30f);
-		addWaypoint(platform); 
+
+		//Adds a waypoint to the platform, rotates the platform and adds the platform to the list of platforms.
+		addWaypoint(platform);
 		platform.transform.Rotate(0f, 0f, Mathf.Abs(angle) > 5.0 ? angle : 0f);
-		addObject(platform, platforms, maxPlatforms);
+		addPlatform(platform);
 	}
 
+	//Adds an AI waypoint as a child of the given platform.
 	private void addWaypoint(GameObject platform)
 	{
 		GameObject waypoint = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
+		//Removes unnecessary components from the waypoint.
 		Destroy(waypoint.rigidbody);
 		Destroy(waypoint.renderer);
 
+		//Sets waypoint properties.
 		waypoint.name = "Waypoint";
 		waypoint.transform.position = platform.transform.position + new Vector3(0f, platform.transform.localScale.y / 1.5f, 0f);
 		waypoint.transform.localScale = new Vector3(1f, 1f, platform.transform.localScale.z);
@@ -201,41 +248,33 @@ public class DrawReader : MonoBehaviour
 		waypoint.collider.isTrigger = true;
 	}
 
-	//Adds a drawn object to the specified list.
-	private void addObject(GameObject gameObject, List<GameObject> list, int max)
+	//Adds a platform to the specified list.
+	private void addPlatform(GameObject platform)
 	{
-		//The object isn't added if it intersects the player.
-		if(!intersectsPlayer(gameObject))
+		//The platform is destroyed if it intersects the player.
+		if(platform.collider.bounds.Intersects(player.collider.bounds))
 		{
-			//Adds the object to the list.
-			list.Add(gameObject);
-			player.GetComponent<PlayerController>().addPlatform(gameObject);
+			Destroy(platform);
+		}
+		else
+		{
+			//Adds the platform to the list of platforms.
+			platforms.Add(platform);
+			player.GetComponent<PlayerController>().addPlatform(platform);
 
-			//Deletes the oldest object in the list if the list contains too many objects.
-			if(list.Count > max)
+			//Deletes the oldest platform if the list of platforms contains too many platforms.
+			if(platforms.Count > maxPlatforms)
 			{
-				GameObject oldGameObject = list[0];
+				GameObject oldGameObject = platforms[0];
 				
-				list.Remove(oldGameObject);
+				platforms.Remove(oldGameObject);
 				player.GetComponent<PlayerController>().removePlatform(oldGameObject);
 				Destroy(oldGameObject);
 			}
 		}
 	}
 
-	//Determines whether a drawn object intersects the player.
-	private bool intersectsPlayer(GameObject gameObject)
-	{
-		//Destroys the object if it intersects the player.
-		if(gameObject.collider.bounds.Intersects(player.collider.bounds))
-		{
-			Destroy(gameObject);
-			return true;
-		}
-
-		return false;
-	}
-
+	//Sets the color of new platforms based on button input.
 	public void setColor(string color)
 	{
 		switch(color)
