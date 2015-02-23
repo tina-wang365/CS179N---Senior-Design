@@ -7,10 +7,12 @@ public class spawner : MonoBehaviour {
 	public float x, y, z;
 	public bool levelEnd = false;
 	public GameObject otherGameObject;
+	private string[] levels;
+	private int level = 0;
 	//setup public variable to represent which trigger activated
 	void Start()
 	{
-
+		levels = new string[] {"tutorial1", "level1", "level2", "level3"};
 	}
 	
 	void OnTriggerStay(Collider other) {
@@ -18,11 +20,14 @@ public class spawner : MonoBehaviour {
 			Debug.Log ("Spikes triggered by player!\n");
 			//other.gameObject.transform.position = new Vector3 (x, y, z);
 			//other.gameObject.rigidbody.velocity = new Vector3 (0, 0, 0);
-			Application.LoadLevel ("tutorial1");
-
+			Debug.Log ("Level = " + level + "\n");
+			Application.LoadLevel (levels[level]);
 		} else if (other.gameObject.name == "playerController" && this.gameObject.name == "door") {
 			Debug.Log ("Door triggered by player!\n");
-			Application.LoadLevel ("level1");
+			Debug.Log ("Level = " + level + "\n");
+			level = level + 1;
+			Application.LoadLevel (levels[level]);
+
 		}
 	}
 }
