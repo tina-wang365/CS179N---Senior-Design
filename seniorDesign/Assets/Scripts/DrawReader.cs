@@ -229,6 +229,7 @@ public class DrawReader : MonoBehaviour
 		addWaypoint(platform);
 		platform.transform.Rotate(0f, 0f, Mathf.Abs(angle) > 5.0 ? angle : 0f);
 		addPlatform(platform);
+		gameObject.GetComponent<AudioSource>().Play();
 	}
 
 	//Adds an AI waypoint as a child of the given platform.
