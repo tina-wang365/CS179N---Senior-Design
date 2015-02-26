@@ -8,6 +8,8 @@ public class spawner : MonoBehaviour {
 	//public bool levelEnd = false;
 	private string[] levels;
 	public static int level = 0;
+	public GameObject pickup;
+	private int numberOfLevels = 7;
 	//setup public variable to represent which trigger activated
 	void Start()
 	{
@@ -26,13 +28,19 @@ public class spawner : MonoBehaviour {
 		} else if (other.gameObject.name == "playerController" && this.gameObject.name == "door") {
 			Debug.Log ("Door triggered by player!\n");
 			Debug.Log ("Level = " + level + "\n");
-			if(level < 6) {
-				level++;
+			if(!pickup.GetComponent<Pickup>().isActive) {
+				if(level < numberOfLevels - 1) {
+					level++;
+				}
+				else {
+					level = 0;
+				}
+				Application.LoadLevel (levels[level]);
+				pickup.SetActive (true);
 			}
 			else {
-				level = 0;
+				Debug.Log ("The door is locked. You need a key.\n");
 			}
-			Application.LoadLevel (levels[level]);
 			
 		}
 	}
