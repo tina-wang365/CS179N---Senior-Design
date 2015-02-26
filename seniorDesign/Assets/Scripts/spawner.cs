@@ -26,7 +26,12 @@ public class spawner : MonoBehaviour {
 		} else if (other.gameObject.name == "playerController" && this.gameObject.name == "door") {
 			Debug.Log ("Door triggered by player!\n");
 			Debug.Log ("Level = " + level + "\n");
-			level++;
+			if(level < 6) {
+				level++;
+			}
+			else {
+				level = 0;
+			}
 			Application.LoadLevel (levels[level]);
 			
 		}
