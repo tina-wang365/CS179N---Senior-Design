@@ -1,12 +1,14 @@
 fileFormatVersion: 2
-guid: 3b946ca455d45db469c967a993bfab63
+guid: 6a230f27b85929e4ba9494c6d7975eda
 ModelImporter:
   serializedVersion: 16
   fileIDToRecycleName:
-    100000: //RootNode
-    400000: //RootNode
-    2300000: //RootNode
-    3300000: //RootNode
+    100000: cone
+    100002: //RootNode
+    400000: cone
+    400002: //RootNode
+    2300000: cone
+    3300000: cone
     4300000: cone
     9500000: //RootNode
   materials:
@@ -28,7 +30,7 @@ ModelImporter:
     isReadable: 1
   meshes:
     lODScreenPercentages: []
-    globalScale: .00999999978
+    globalScale: 1
     meshCompression: 0
     addColliders: 0
     importBlendShapes: 1
