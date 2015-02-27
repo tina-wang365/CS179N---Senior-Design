@@ -229,7 +229,6 @@ public class DrawReader : MonoBehaviour
 		addWaypoint(platform);
 		platform.transform.Rotate(0f, 0f, Mathf.Abs(angle) > 5.0 ? angle : 0f);
 		addPlatform(platform);
-		gameObject.GetComponent<AudioSource>().Play();
 	}
 
 	//Adds an AI waypoint as a child of the given platform.
@@ -262,6 +261,7 @@ public class DrawReader : MonoBehaviour
 			//Adds the platform to the list of platforms.
 			platforms.Add(platform);
 			player.GetComponent<PlayerController>().addPlatform(platform);
+			gameObject.GetComponent<AudioSource>().Play();
 
 			//Deletes the oldest platform if the list of platforms contains too many platforms.
 			if(platforms.Count > maxPlatforms)

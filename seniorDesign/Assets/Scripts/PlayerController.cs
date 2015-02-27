@@ -33,7 +33,7 @@ public class PlayerController : MonoBehaviour
 
 			foreach(ContactPoint contact in collider.contacts)
 			{
-				if(contact.normal == direction)
+				if(Vector3.Angle(contact.normal, direction) <= 45f)
 				{
 					//rigidbody.velocity = direction * 100f;
 					rigidbody.AddForce(direction * 5000f);
