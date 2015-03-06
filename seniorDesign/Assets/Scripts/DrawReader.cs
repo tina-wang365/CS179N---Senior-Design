@@ -63,8 +63,8 @@ public class DrawReader : MonoBehaviour
 		if(Input.GetMouseButtonDown(0))
 		{
 			isMousePressed = true;
-			
-			line.SetColors(platformColor, platformColor);
+
+			line.SetColors(new Color(platformColor.r, platformColor.g, platformColor.b, 0.75f), new Color(platformColor.r, platformColor.g, platformColor.b, 0.75f));
 			line.SetVertexCount(2);
 		}
 		else if(Input.GetMouseButtonUp(0))
@@ -126,7 +126,25 @@ public class DrawReader : MonoBehaviour
 
 				//Sets the line's position based on the current points.
 				line.SetPosition(0, points[0]);
-				line.SetPosition(1, points[points.Count - 1]);
+
+				if(points.Count > 1)
+				{
+					line.SetVertexCount((int) maxDistance);
+
+					for(int i = 1; i < (int) maxDistance - 1; i++)
+					{
+						Vector2 pos =  points[0] + (points[1] - points[0]) * (float) i / maxDistance;
+						Vector2 rand = Random.insideUnitCircle + pos;
+
+						line.SetPosition(i, new Vector3(rand.x, rand.y, 0f));
+					}
+
+					line.SetPosition((int) maxDistance - 1, points[points.Count - 1]);
+				}
+				else
+				{
+					line.SetPosition(1, points[points.Count - 1]);
+				}
 			}
 		}
 	}
@@ -140,6 +158,17 @@ public class DrawReader : MonoBehaviour
 			platforms[0].particleSystem.playbackSpeed = 1f;
 			platforms[0].particleSystem.startSize = 1f;
 			platforms[0].particleSystem.Play();
+		}
+
+		if(points.Count > 1)
+		{
+			for(int i = 1; i < (int) maxDistance - 1; i++)
+			{
+				Vector2 pos =  points[0] + (points[1] - points[0]) * (float) i / maxDistance;
+				Vector2 rand = Random.insideUnitCircle + pos;
+				
+				line.SetPosition(i, new Vector3(rand.x, rand.y, 0f));
+			}
 		}
 	}
 
