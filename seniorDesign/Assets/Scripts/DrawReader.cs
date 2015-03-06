@@ -151,7 +151,7 @@ public class DrawReader : MonoBehaviour
 
 	void FixedUpdate()
 	{
-		//Modified and activates the particle system of the next platform to be deleted.
+		//Modifies and activates the particle system of the next platform to be deleted.
 		if(platforms.Count == maxPlatforms && maxPlatforms > 0 && platforms[0].particleSystem.isStopped)
 		{
 			platforms[0].particleSystem.emissionRate = 10f;
@@ -160,6 +160,7 @@ public class DrawReader : MonoBehaviour
 			platforms[0].particleSystem.Play();
 		}
 
+		//Produces lightning effect for line renderer.
 		if(points.Count > 1)
 		{
 			for(int i = 1; i < (int) maxDistance - 1; i++)
@@ -256,7 +257,7 @@ public class DrawReader : MonoBehaviour
 
 		//Adds a waypoint to the platform, rotates the platform and adds the platform to the list of platforms.
 		addWaypoint(platform);
-		platform.transform.Rotate(0f, 0f, Mathf.Abs(angle) > 5.0 ? angle : 0f);
+		platform.transform.Rotate(0f, 0f, Mathf.Abs(angle) > 5f ? angle : 0f);
 		addPlatform(platform);
 	}
 
