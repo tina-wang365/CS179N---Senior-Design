@@ -39,6 +39,11 @@ public class PlayerController : MonoBehaviour
 					rigidbody.AddForce(direction * 5000f);
 					break;
 				}
+				else if(Vector3.Angle(contact.normal, -direction) <= 45f)
+				{
+					rigidbody.AddForce(-direction * 5000f);
+					break;
+				}
 			}
 		}
 		else if(collider.gameObject.name.Equals("Platform") && collider.gameObject.GetComponent<MeshRenderer>().material.color.Equals(Color.red))
