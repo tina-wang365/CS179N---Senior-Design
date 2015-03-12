@@ -253,7 +253,7 @@ public class DrawReader : MonoBehaviour
 		platform.light.range = 100f;
 		platform.GetComponent<MeshRenderer>().material.color = platformColor;
 		platform.transform.position = new Vector3((points[points.Count - 1].x + points[0].x) / 2f, (points[points.Count - 1].y + points[0].y) / 2f, 0f);
-		platform.transform.localScale = new Vector3(length, 3f, 30f);
+		platform.transform.localScale = new Vector3(length < 3f ? 3f : length, 3f, 30f);
 
 		//Adds a waypoint to the platform, rotates the platform and adds the platform to the list of platforms.
 		addWaypoint(platform);
