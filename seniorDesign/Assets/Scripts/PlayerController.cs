@@ -104,16 +104,17 @@ public class PlayerController : MonoBehaviour
 		float moveSpeed = 10f;
 		float jumpSpeed = 20f;
 		float gravity = 20f;
+		float length = 0f;
+		float height = 0f;
+		bool jump = false;
+		//bool jump;
 		
 		if(controller.isGrounded)
 		{
-			bool jump = false;
+			//bool jump = false;
 
 			if(useAI)
 			{
-				float length = 0f;
-				float height = 0f;
-
 				if(platforms.Count > 0)
 				{
 					Transform closestWaypoint = null;
@@ -190,19 +191,17 @@ public class PlayerController : MonoBehaviour
 
 					if(Mathf.Abs(length) <= maxJumpLength && (height > 0f || Mathf.Abs(length) > minJumpLength))
 					{
-						Collider[] colliders = Physics.OverlapSphere(playerPosition + new Vector3(minJumpLength * length / Mathf.Abs(length), -controller.radius, 0f), 1f);
-
-						jump = true;
-
-						foreach(Collider collider in colliders)
-						{
-							if(!collider.gameObject.name.Contains("spike"))
-							{
-								jump = false;
-							}
+						Collider[] hitColliders = Physics.OverlapSphere(playerPosition + new Vector3(minJumpLength*length/Mathf.Abs (length),-5,0), controller.radius + 5);
+						int i = 0;
+						while (i < hitColliders.Length) {
+							Debug.Log ("hitCollier: " + hitColliders[i].name);
+							if(hitColliders[i].name != "spike")
+							//hitColliders[i].SendMessage("AddDamage");
+							i++;
 						}
+						//jump = height > 0f || Physics.OverlapSphere(playerPosition + (playerPosition - targetPosition) / 2f, controller.radius + 5).Length == 0;
+						jump = height > 0f || Physics.OverlapSphere(playerPosition + new Vector3(minJumpLength*length/Mathf.Abs (length),-5,0), controller.radius + 5).Length == 0;
 
-						jump = jump || height > 0f;
 					}
 				}
 				else
@@ -219,9 +218,17 @@ public class PlayerController : MonoBehaviour
 				jump = Input.GetButton("Jump");
 			}
 
+			//Decreasing the jump speed to NOT over jump
+			if(Mathf.Abs(length) < 10.0f && height > 0)
+			{	
+				jumpSpeed = 15;
+			}
 			moveDirection = transform.TransformDirection(moveDirection) * moveSpeed;
 			moveDirection.y = jump ? jumpSpeed : moveDirection.y;
 		}
+
+		if(Mathf.Abs(length) < 10.0f && jump)
+			moveSpeed = 10;
 
 		moveDirection += redDirection + blueDirection;
 		redDirection = Vector3.zero;
