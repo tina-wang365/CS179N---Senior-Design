@@ -190,7 +190,19 @@ public class PlayerController : MonoBehaviour
 
 					if(Mathf.Abs(length) <= maxJumpLength && (height > 0f || Mathf.Abs(length) > minJumpLength))
 					{
-						jump = height > 0f || Physics.OverlapSphere(playerPosition + (playerPosition - targetPosition) / 2f, 1f).Length == 0;
+						Collider[] colliders = Physics.OverlapSphere(playerPosition + new Vector3(minJumpLength * length / Mathf.Abs(length), -controller.radius, 0f), 1f);
+
+						jump = true;
+
+						foreach(Collider collider in colliders)
+						{
+							if(!collider.gameObject.name.Contains("spike"))
+							{
+								jump = false;
+							}
+						}
+
+						jump = jump || height > 0f;
 					}
 				}
 				else

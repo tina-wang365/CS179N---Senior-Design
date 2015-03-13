@@ -13,12 +13,12 @@ public class spawner : MonoBehaviour {
 	//setup public variable to represent which trigger activated
 	void Start()
 	{
-		levels = new string[] {"tutorial1", "level1", "level2", "level3", "level6", "level7", "endScene"};
+		levels = new string[] {"level1", "level2", "level3", "level4", "level5", "level6", "level7", "level8", "level9", "level10", "endScene"};
 	}
 	
 	void OnTriggerStay(Collider other) {
 		if (other.gameObject.name == "playerController" && 
-		    (this.gameObject.name == "spikes" || this.gameObject.name == "mediumSpikes3x1"))
+		    (this.gameObject.name == "spike" || this.gameObject.name == "mediumSpikes3x1"))
 		{
 			Debug.Log ("Spikes triggered by player!\n");
 			//other.gameObject.transform.position = new Vector3 (x, y, z);
