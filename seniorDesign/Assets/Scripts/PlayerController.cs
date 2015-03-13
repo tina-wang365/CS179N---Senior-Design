@@ -145,15 +145,10 @@ public class PlayerController : MonoBehaviour
 					float minJumpLength = 0f;
 					float maxJumpLength = Mathf.Infinity;
 					float doorAttractDistance = 40f;
-					float keyAttractDistance = 20f;
+					float keyAttractDistance = 15f;
 					float distanceToDoor = Mathf.Sqrt(Mathf.Pow(doorPosition.x - playerPosition.x, 2f) + Mathf.Pow(doorPosition.y - playerPosition.y, 2f));
 					float distanceToKey = key != null ? Mathf.Sqrt(Mathf.Pow(keyPosition.x - playerPosition.x, 2f)
 						+ Mathf.Pow(keyPosition.y - playerPosition.y, 2f)) : Mathf.Infinity;
-
-					if(lineOfSightExists(door.collider))
-					{
-						print ("Line of sight exists.");
-					}
 
 					if(key == null && distanceToDoor <= doorAttractDistance && lineOfSightExists(door.collider))
 					{
@@ -174,8 +169,8 @@ public class PlayerController : MonoBehaviour
 					else if(closestWaypoint != null)
 					{
 						length = closestPosition.x - playerPosition.x;
-						height = closestPosition.y - playerPosition.y - 5f;
-						minJumpLength = platforms[platforms.Count - 1].transform.localScale.x;
+						height = closestWaypoint.parent.position.y + closestWaypoint.parent.localScale.y - (playerPosition.y - controller.radius);
+						minJumpLength = 15f;
 						maxJumpLength = 25f;
 						targetPosition = closestPosition;
 						
