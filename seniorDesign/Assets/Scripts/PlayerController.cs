@@ -82,8 +82,7 @@ public class PlayerController : MonoBehaviour
 		Vector3 origin = gameObject.transform.position;
 		int intervals = 25;
 
-		origin.y += gameObject.GetComponent<CharacterController>().radius;
-		origin.z = collider.transform.position.z;
+		origin.y += gameObject.GetComponent<CharacterController>().radius / 2f;
 
 		for(int i = 0; i < intervals; i++)
 		{
@@ -145,32 +144,18 @@ public class PlayerController : MonoBehaviour
 					Vector3 targetPosition;
 					float minJumpLength = 0f;
 					float maxJumpLength = Mathf.Infinity;
-					float doorAttractDistance = 20f;
+					float doorAttractDistance = 40f;
 					float keyAttractDistance = 20f;
 					float distanceToDoor = Mathf.Sqrt(Mathf.Pow(doorPosition.x - playerPosition.x, 2f) + Mathf.Pow(doorPosition.y - playerPosition.y, 2f));
 					float distanceToKey = key != null ? Mathf.Sqrt(Mathf.Pow(keyPosition.x - playerPosition.x, 2f)
 						+ Mathf.Pow(keyPosition.y - playerPosition.y, 2f)) : Mathf.Infinity;
 
-					if((distanceToClosest < distanceToDoor || key != null) && distanceToClosest < distanceToKey)
+					if(lineOfSightExists(door.collider))
 					{
-						length = closestPosition.x - playerPosition.x;
-						height = closestPosition.y - playerPosition.y;
-						minJumpLength = platforms[platforms.Count - 1].transform.localScale.x;
-						maxJumpLength = 25f;
-						targetPosition = closestPosition;
-
-						if(Mathf.Abs(length) < 0.1f)
-						{
-							Destroy(closestWaypoint.gameObject);
-						}
-
-						if(height > 10f)
-						{
-							length = 0f;
-							height = 0f;
-						}
+						print ("Line of sight exists.");
 					}
-					else if(key == null && (closestWaypoint != null || distanceToDoor <= doorAttractDistance) && lineOfSightExists(door.collider))
+
+					if(key == null && distanceToDoor <= doorAttractDistance && lineOfSightExists(door.collider))
 					{
 						length = doorPosition.x - playerPosition.x;
 						height = doorPosition.y - door.transform.localScale.y / 2f - playerPosition.y + controller.radius;
@@ -178,13 +163,32 @@ public class PlayerController : MonoBehaviour
 						maxJumpLength = 35f;
 						targetPosition = doorPosition;
 					}
-					else if(key != null && (closestWaypoint != null || distanceToKey <= keyAttractDistance) && lineOfSightExists(key.collider))
+					else if(key != null && distanceToKey <= keyAttractDistance && lineOfSightExists(key.collider))
 					{
 						length = keyPosition.x - playerPosition.x;
 						height = keyPosition.y - playerPosition.y;
 						minJumpLength = 20f;
 						maxJumpLength = 25f;
 						targetPosition = keyPosition;
+					}
+					else if(closestWaypoint != null)
+					{
+						length = closestPosition.x - playerPosition.x;
+						height = closestPosition.y - playerPosition.y - 5f;
+						minJumpLength = platforms[platforms.Count - 1].transform.localScale.x;
+						maxJumpLength = 25f;
+						targetPosition = closestPosition;
+						
+						if(Mathf.Abs(length) < 0.1f)
+						{
+							Destroy(closestWaypoint.gameObject);
+						}
+						
+						if(height > 10f)
+						{
+							length = 0f;
+							height = 0f;
+						}
 					}
 
 					length = Mathf.Abs(length) < 0.1f ? 0f : length;
