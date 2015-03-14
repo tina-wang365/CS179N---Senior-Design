@@ -12,6 +12,8 @@ public class PlayerController : MonoBehaviour
 	private CharacterController controller;
 	public bool useAI;
 
+	GameObject skeleton;
+
 	void Awake()
 	{
 		controller = gameObject.AddComponent<CharacterController>();
@@ -199,6 +201,22 @@ public class PlayerController : MonoBehaviour
 
 					length = Mathf.Abs(length) < 0.1f ? 0f : length;
 
+					//rotation.eulerAngles = transform.GetChild(0).rotation.eulerAngles;
+					//transform.GetChild(0).rotation = Quaternion.Euler(0,-90,0);
+					//Quaternion temp.eulerAngles = rotation.eulerAngles;
+					//rotation.eulerAngles.y = temp.eulerAngles.y * -1;
+					//Debug.Log (transform.GetChild(0).rotation.eulerAngles);
+					//Debug.Log (transform.GetChild(0).rotation.eulerAngles);
+					
+					if(length < 0)
+					{
+						transform.GetChild(0).rotation = Quaternion.Euler(0,-90,0);
+					}
+					else
+					{
+						transform.GetChild(0).rotation = Quaternion.Euler(0,90,0);
+					}
+
 					if(Mathf.Abs(length) <= maxJumpLength && (height > 0f || Mathf.Abs(length) > minJumpLength))
 					{
 						Collider[] colliders = Physics.OverlapSphere(playerPosition + new Vector3(playerRadius * length / Mathf.Abs(length), -playerRadius, 0f), 1f);
@@ -252,5 +270,9 @@ public class PlayerController : MonoBehaviour
 		moveDirection.y -= gravity * Time.deltaTime;
 		
 		controller.Move(moveDirection * Time.deltaTime);
+		
+		skeleton = GameObject.Find("playerController/Skeleton Legacy");
+		skeleton.transform.position = new Vector3(controller.transform.position.x,controller.transform.position.y - 2.5f,controller.transform.position.z);
+
 	}
 }
