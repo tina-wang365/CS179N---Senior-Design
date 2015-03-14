@@ -112,13 +112,27 @@ public class PlayerController : MonoBehaviour
 		Vector3 origin = gameObject.transform.position;
 		int intervals = 25;
 
-		origin.y += gameObject.transform.localScale.y * controller.height / 2f;
+		origin.x += gameObject.transform.localScale.x * controller.radius * 1.1f;
+		origin.y += gameObject.transform.localScale.y * controller.height * 0.75f;
 
 		for(int i = 0; i < intervals; i++)
 		{
 			float angle = (float) i * 2f * Mathf.PI / (float) intervals;
 			Vector3 direction = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f);
 
+			if(Physics.Raycast(origin, direction, out hit) && hit.collider.Equals(collider))
+			{
+				return true;
+			}
+		}
+
+		origin.x -= 2f * gameObject.transform.localScale.x * controller.radius * 1.1f;
+
+		for(int i = 0; i < intervals; i++)
+		{
+			float angle = (float) i * 2f * Mathf.PI / (float) intervals;
+			Vector3 direction = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f);
+			
 			if(Physics.Raycast(origin, direction, out hit) && hit.collider.Equals(collider))
 			{
 				return true;
@@ -207,7 +221,7 @@ public class PlayerController : MonoBehaviour
 					if(key == null && distanceToDoor <= doorAttractDistance && lineOfSightExists(door.collider))
 					{
 						length = doorPosition.x - playerPosition.x;
-						height = doorPosition.y - door.transform.localScale.y / 2f - playerPosition.y + 3.5f + halfPlayerHeight;
+						height = doorPosition.y - door.transform.localScale.y / 2f - playerPosition.y + halfPlayerHeight;
 						minJumpLength = 20f;
 						maxJumpLength = 35f;
 						targetPosition = doorPosition;
@@ -215,7 +229,7 @@ public class PlayerController : MonoBehaviour
 					else if(key != null && distanceToKey <= keyAttractDistance && lineOfSightExists(key.collider))
 					{
 						length = keyPosition.x - playerPosition.x;
-						height = keyPosition.y - playerPosition.y + 3.5f;
+						height = keyPosition.y - playerPosition.y;
 						minJumpLength = 20f;
 						maxJumpLength = 25f;
 						targetPosition = keyPosition;
