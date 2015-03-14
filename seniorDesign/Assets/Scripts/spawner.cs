@@ -70,7 +70,12 @@ public class spawner : MonoBehaviour
 			Debug.Log ("Door triggered by player!\n");
 			Debug.Log ("Level = " + level + "\n");
 
-			if(!pickup.GetComponent<Pickup>().isActive)
+			if(pickup == null)
+			{
+				Destroy(other.gameObject);
+			}
+
+			else if(!pickup.GetComponent<Pickup>().isActive)
 			{
 				if(level < numberOfLevels - 1)
 				{
