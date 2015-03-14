@@ -11,13 +11,23 @@ public class PlayerController : MonoBehaviour
 	private AudioSource[] audio;
 	private CharacterController controller;
 	public bool useAI;
+	float length;
 
 	GameObject skeleton;
+	Animator anim;
 
 	void Awake()
 	{
 		controller = gameObject.AddComponent<CharacterController>();
+		controller.height = 2.5f;
+		controller.center = new Vector3 (controller.center.x, controller.center.y + 1.5f, controller.center.z);
 		audio = gameObject.GetComponents<AudioSource>();
+	}
+
+	void Start()
+	{
+		skeleton = GameObject.Find("playerController/Skeleton Legacy");
+		anim = skeleton.GetComponent<Animator> ();
 	}
 
 	// collision detection between player and various objects
@@ -111,11 +121,28 @@ public class PlayerController : MonoBehaviour
 		return false;
 	}
 
+	void FixedUpdate()
+	{
+		//skeleton = GameObject.Find("playerController/Skeleton Legacy");
+		skeleton.transform.position = new Vector3(controller.transform.position.x,controller.transform.position.y + 1.0f,controller.transform.position.z);
+		//Animator anim = skeleton.GetComponent<Animator> ();
+
+		if(Mathf.Abs(length) > 0.0f)
+			anim.SetFloat("moving", 1);
+		else
+			anim.SetFloat("moving",0);
+		
+	}
+
 	void Update()
 	{
+		//skeleton = GameObject.Find("playerController/Skeleton Legacy");
+		//skeleton.transform.position = new Vector3(controller.transform.position.x,controller.transform.position.y - 2.5f,controller.transform.position.z);
 		float moveSpeed = 10f;
 		float jumpSpeed = 20f;
 		float gravity = 20f;
+
+		//Animator anim = skeleton.GetComponent<Animator> ();
 		
 		if(controller.isGrounded)
 		{
@@ -123,7 +150,8 @@ public class PlayerController : MonoBehaviour
 
 			if(useAI)
 			{
-				float length = 0f;
+				//float length = 0f;
+				length = 0f;
 				float height = 0f;
 
 				if(platforms.Count > 0)
@@ -166,7 +194,7 @@ public class PlayerController : MonoBehaviour
 					if(key == null && distanceToDoor <= doorAttractDistance && lineOfSightExists(door.collider))
 					{
 						length = doorPosition.x - playerPosition.x;
-						height = doorPosition.y - door.transform.localScale.y / 2f - playerPosition.y + playerRadius;
+						height = doorPosition.y - door.transform.localScale.y / 2f - playerPosition.y + 4f + playerRadius;
 						minJumpLength = 20f;
 						maxJumpLength = 35f;
 						targetPosition = doorPosition;
@@ -174,7 +202,7 @@ public class PlayerController : MonoBehaviour
 					else if(key != null && distanceToKey <= keyAttractDistance && lineOfSightExists(key.collider))
 					{
 						length = keyPosition.x - playerPosition.x;
-						height = keyPosition.y - playerPosition.y;
+						height = keyPosition.y - playerPosition.y + 4f;
 						minJumpLength = 20f;
 						maxJumpLength = 25f;
 						targetPosition = keyPosition;
@@ -182,7 +210,7 @@ public class PlayerController : MonoBehaviour
 					else if(closestWaypoint != null)
 					{
 						length = closestPosition.x - playerPosition.x;
-						height = closestWaypoint.parent.position.y + closestWaypoint.parent.localScale.y / 2f - (playerPosition.y - playerRadius);
+						height = closestWaypoint.parent.position.y + closestWaypoint.parent.localScale.y / 2f - (playerPosition.y + 4f - playerRadius);
 						minJumpLength = 15f;
 						maxJumpLength = 25f;
 						targetPosition = closestPosition;
@@ -191,6 +219,8 @@ public class PlayerController : MonoBehaviour
 						{
 							Destroy(closestWaypoint.gameObject);
 						}
+
+						Debug.Log(height);
 						
 						if(height > 10f)
 						{
@@ -253,6 +283,10 @@ public class PlayerController : MonoBehaviour
 				}
 
 				moveDirection = new Vector3(length == 0f ? 0f : length / Mathf.Abs(length), 0f, 0f);
+//				if(Mathf.Abs(length) > 0.0f)
+//					anim.SetFloat("moving", 1);
+//				else
+//					anim.SetFloat("moving",0);
 			}
 			else
 			{
@@ -270,9 +304,19 @@ public class PlayerController : MonoBehaviour
 		moveDirection.y -= gravity * Time.deltaTime;
 		
 		controller.Move(moveDirection * Time.deltaTime);
+		//Debug.Log(controller.velocity);
 		
-		skeleton = GameObject.Find("playerController/Skeleton Legacy");
-		skeleton.transform.position = new Vector3(controller.transform.position.x,controller.transform.position.y - 2.5f,controller.transform.position.z);
+		//skeleton = GameObject.Find("playerController/Skeleton Legacy");
+		//skeleton.transform.position = new Vector3(controller.transform.position.x,controller.transform.position.y - 2.5f,controller.transform.position.z);
+		//Animator anim = skeleton.GetComponent<Animator> ();
+	
+		//anim.SetFloat("speed", Mathf.Abs(controller.velocity.x));
 
+//		foreach(AnimationState state in anim)
+//		{
+//			Debug.Log(state.name);
+//		}
+//		if(controller.velocity.x != 0)
+//			anim.Play(8;
 	}
 }
