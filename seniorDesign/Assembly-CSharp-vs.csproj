@@ -51,11 +51,11 @@
      <Compile Include="Assets\Scripts\LRenemy.cs" />
      <Compile Include="Assets\Scripts\LRenemy2.cs" />
      <Compile Include="Assets\Scripts\OnClickButton.cs" />
+     <Compile Include="Assets\Scripts\Pickup.cs" />
      <Compile Include="Assets\Scripts\PlayerController.cs" />
      <Compile Include="Assets\Scripts\UDenemy.cs" />
      <Compile Include="Assets\Scripts\UDenemy2.cs" />
      <Compile Include="Assets\Scripts\inviScript.cs" />
-     <Compile Include="Assets\Scripts\pickup.cs" />
      <Compile Include="Assets\Scripts\spawner.cs" />
      <Compile Include="Assets\Skeleton\Script\characterRotate.cs" />
      <None Include="Assets\Standard Assets\Toon Shading\Sources\Shaders\Toony-Basic.shader" />
