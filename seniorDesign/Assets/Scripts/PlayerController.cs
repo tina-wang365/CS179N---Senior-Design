@@ -145,6 +145,14 @@ public class PlayerController : MonoBehaviour
 		float gravity = 20f;
 
 		//Animator anim = skeleton.GetComponent<Animator> ();
+		if (Input.GetKeyDown (KeyCode.R))
+			Application.LoadLevel (Application.loadedLevel);
+
+//		Debug.Log (Input.GetKeyDown (KeyCode.P));
+//		if (Input.GetKeyDown (KeyCode.P))
+//			Time.timeScale = 0.0f;
+//		else
+//			Time.timeScale = 1.0f;
 		
 		if(controller.isGrounded)
 		{
