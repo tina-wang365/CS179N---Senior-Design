@@ -21,7 +21,7 @@ public class PlayerController : MonoBehaviour
 	{
 		controller = gameObject.AddComponent<CharacterController>();
 		controller.height = 2.0f;
-		controller.center = new Vector3 (controller.center.x, controller.center.y + 1.5f, controller.center.z);
+		//controller.center = new Vector3 (controller.center.x, controller.center.y + 1.5f, controller.center.z);
 		audio = gameObject.GetComponents<AudioSource>();
 	}
 
@@ -112,7 +112,7 @@ public class PlayerController : MonoBehaviour
 		Vector3 origin = gameObject.transform.position;
 		int intervals = 25;
 
-		origin.y += gameObject.transform.localScale.y * controller.radius / 2f;
+		origin.y += gameObject.transform.localScale.y * controller.height / 2f;
 
 		for(int i = 0; i < intervals; i++)
 		{
@@ -131,9 +131,9 @@ public class PlayerController : MonoBehaviour
 	void FixedUpdate()
 	{
 		//skeleton = GameObject.Find("playerController/Skeleton Legacy");
-		skeleton.transform.position = new Vector3(controller.transform.position.x,controller.transform.position.y + 2.5f,controller.transform.position.z);
+		//skeleton.transform.position = new Vector3(controller.transform.position.x,controller.transform.position.y - gameObject.transform.localScale.y,controller.transform.position.z);
 		//Animator anim = skeleton.GetComponent<Animator> ();
-		
+
 		if (Mathf.Abs (length) == 0.0f)
 			anim2.Play ("Idle");
 		else
@@ -148,7 +148,7 @@ public class PlayerController : MonoBehaviour
 	void Update()
 	{
 		//skeleton = GameObject.Find("playerController/Skeleton Legacy");
-		//skeleton.transform.position = new Vector3(controller.transform.position.x,controller.transform.position.y - 2.5f,controller.transform.position.z);
+		skeleton.transform.position = new Vector3(controller.transform.position.x,controller.transform.position.y - gameObject.transform.localScale.y,controller.transform.position.z);
 		float moveSpeed = 10f;
 		float jumpSpeed = 20f;
 		float gravity = 20f;
@@ -173,7 +173,7 @@ public class PlayerController : MonoBehaviour
 					Vector3 closestPosition = Vector3.zero;
 					Vector3 playerPosition = gameObject.transform.position;
 					float distanceToClosest = Mathf.Infinity;
-					float playerRadius = gameObject.transform.localScale.x * controller.radius;
+					float halfPlayerHeight = gameObject.transform.localScale.y * controller.height / 2f;
 
 					foreach(GameObject platform in platforms)
 					{
@@ -207,7 +207,7 @@ public class PlayerController : MonoBehaviour
 					if(key == null && distanceToDoor <= doorAttractDistance && lineOfSightExists(door.collider))
 					{
 						length = doorPosition.x - playerPosition.x;
-						height = doorPosition.y - door.transform.localScale.y / 2f - playerPosition.y + 3.5f + playerRadius;
+						height = doorPosition.y - door.transform.localScale.y / 2f - playerPosition.y + 3.5f + halfPlayerHeight;
 						minJumpLength = 20f;
 						maxJumpLength = 35f;
 						targetPosition = doorPosition;
@@ -223,7 +223,7 @@ public class PlayerController : MonoBehaviour
 					else if(closestWaypoint != null)
 					{
 						length = closestPosition.x - playerPosition.x;
-						height = closestWaypoint.parent.position.y + closestWaypoint.parent.localScale.y / 2f - (playerPosition.y + 4.0f - playerRadius);
+						height = closestWaypoint.parent.position.y + closestWaypoint.parent.localScale.y / 2f - (playerPosition.y - halfPlayerHeight);
 						minJumpLength = 15f;
 						maxJumpLength = 25f;
 						targetPosition = closestPosition;
@@ -235,7 +235,7 @@ public class PlayerController : MonoBehaviour
 
 						Debug.Log(height);
 						
-						if(height > 10f)
+						if(height > 11f)
 						{
 							length = 0f;
 							height = 0f;
@@ -262,7 +262,8 @@ public class PlayerController : MonoBehaviour
 
 					if(Mathf.Abs(length) <= maxJumpLength && (height > 0f || Mathf.Abs(length) > minJumpLength))
 					{
-						Collider[] colliders = Physics.OverlapSphere(playerPosition + new Vector3(playerRadius * length / Mathf.Abs(length), -playerRadius, 0f), 1f);
+						float leadDistance = gameObject.transform.localScale.x * controller.radius * length / Mathf.Abs(length);
+						Collider[] colliders = Physics.OverlapSphere(playerPosition + new Vector3(leadDistance, -halfPlayerHeight, 0f), 1f);
 						bool onTarget = false;
 
 						jump = true;
