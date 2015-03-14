@@ -1,30 +1,41 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Pickup : MonoBehaviour {
-	//public bool levelRestart = false;
+public class Pickup : MonoBehaviour
+{
 	public bool isActive = true;
+
 	// Use this for initialization
-	void Start () {
-		//if (levelRestart) {
-			this.gameObject.SetActive (true); //active must be set to true
-			isActive = true;
-		//	levelRestart = false;
-		//}
+	void Start()
+	{
+		gameObject.SetActive(true); //active must be set to true
+
+		isActive = true;
 
 	}
-	void OnTriggerEnter(Collider other) {
-		//if (other.gameObject.name == "playerController") {
-			this.gameObject.SetActive (false); //active must be set to false
-			isActive = false;
-		//}
+	void OnTriggerEnter(Collider other)
+	{
+		gameObject.GetComponent<AudioSource>().Play();
+
+		gameObject.GetComponent<MeshRenderer>().enabled = false;
+		gameObject.GetComponent<SphereCollider>().enabled = false;
+		isActive = false;
 	}
 	                                 
 	// Update is called once per frame
-	void Update () {
-	
+	void Update()
+	{
+		if(gameObject.GetComponent<AudioSource>().time > 2f && !isActive)
+		{
+			gameObject.GetComponent<MeshRenderer>().enabled = true;
+			gameObject.GetComponent<SphereCollider>().enabled = true;
+
+			gameObject.SetActive(false); //active must be set to false
+		}
 	}
-	void setActive(bool active) {
+
+	void setActive(bool active)
+	{
 		isActive = active;
 	}
 }

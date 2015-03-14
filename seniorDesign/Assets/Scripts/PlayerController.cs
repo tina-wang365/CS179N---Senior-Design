@@ -8,11 +8,14 @@ public class PlayerController : MonoBehaviour
 	private Vector3 moveDirection = Vector3.zero;
 	private Vector3 blueDirection = Vector3.zero;
 	private Vector3 redDirection = Vector3.zero;
+	private AudioSource[] audio;
+	private CharacterController controller;
 	public bool useAI;
 
 	void Awake()
 	{
-		gameObject.AddComponent<CharacterController>();
+		controller = gameObject.AddComponent<CharacterController>();
+		audio = gameObject.GetComponents<AudioSource>();
 	}
 
 	// collision detection between player and various objects
@@ -33,10 +36,14 @@ public class PlayerController : MonoBehaviour
 				if(Vector3.Angle(hit.normal, surfaceDirection) <= 45f)
 				{
 					blueDirection = surfaceDirection * 50f;
+
+					audio[0].Play();
 				}
 				else if(Vector3.Angle(hit.normal, -surfaceDirection) <= 45f)
 				{
 					blueDirection = -surfaceDirection * 50f;
+
+					audio[0].Play();
 				}
 			}
 			else if(hit.gameObject.GetComponent<MeshRenderer>().material.color.Equals(Color.red))
@@ -51,10 +58,14 @@ public class PlayerController : MonoBehaviour
 					if(dot > 0f)
 					{
 						redDirection = direction * 50f;
+
+						audio[1].Play();
 					}
 					else if(dot < 0f)
 					{
 						redDirection = -direction * 50f;
+
+						audio[1].Play();
 					}
 				}
 			}
@@ -82,7 +93,7 @@ public class PlayerController : MonoBehaviour
 		Vector3 origin = gameObject.transform.position;
 		int intervals = 25;
 
-		origin.y += gameObject.transform.localScale.y * gameObject.GetComponent<CharacterController>().radius / 2f;
+		origin.y += gameObject.transform.localScale.y * controller.radius / 2f;
 
 		for(int i = 0; i < intervals; i++)
 		{
@@ -100,7 +111,6 @@ public class PlayerController : MonoBehaviour
 
 	void Update()
 	{
-		CharacterController controller = gameObject.GetComponent<CharacterController>();
 		float moveSpeed = 10f;
 		float jumpSpeed = 20f;
 		float gravity = 20f;

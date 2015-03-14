@@ -10,6 +10,7 @@ public class DrawReader : MonoBehaviour
 	private List<Vector3> points;
 	private List<GameObject> platforms;
 	private Color platformColor;
+	private AudioSource[] audio;
 	public float maxDistance;
 	public int maxPlatforms;
 	public bool enableBlue;
@@ -26,6 +27,7 @@ public class DrawReader : MonoBehaviour
 		platformColor = Color.white;
 		line.material = new Material(Shader.Find("Particles/Additive"));
 		line.useWorldSpace = true;
+		audio = gameObject.GetComponents<AudioSource>();
 
 		line.SetVertexCount(0);
 		line.SetWidth(0.5f, 0.5f);
@@ -66,6 +68,7 @@ public class DrawReader : MonoBehaviour
 
 			line.SetColors(new Color(platformColor.r, platformColor.g, platformColor.b, 0.75f), new Color(platformColor.r, platformColor.g, platformColor.b, 0.75f));
 			line.SetVertexCount(2);
+			audio[2].Play();
 		}
 		else if(Input.GetMouseButtonUp(0))
 		{
@@ -73,6 +76,7 @@ public class DrawReader : MonoBehaviour
 			createPlatform();
 			line.SetVertexCount(0);
 			points.RemoveRange(0, points.Count);
+			audio[2].Stop();
 
 			isMousePressed = false;
 		}
@@ -170,6 +174,11 @@ public class DrawReader : MonoBehaviour
 				
 				line.SetPosition(i, new Vector3(rand.x, rand.y, 0f));
 			}
+		}
+
+		if(Time.timeSinceLevelLoad > 1f && !audio[1].isPlaying)
+		{
+			audio[1].Play();
 		}
 	}
 
@@ -291,7 +300,7 @@ public class DrawReader : MonoBehaviour
 			//Adds the platform to the list of platforms.
 			platforms.Add(platform);
 			player.GetComponent<PlayerController>().addPlatform(platform);
-			gameObject.GetComponent<AudioSource>().Play();
+			audio[0].Play();
 
 			//Deletes the oldest platform if the list of platforms contains too many platforms.
 			if(platforms.Count > maxPlatforms)
