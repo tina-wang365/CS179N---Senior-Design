@@ -112,7 +112,7 @@ public class PlayerController : MonoBehaviour
 		Vector3 origin = gameObject.transform.position;
 		int intervals = 25;
 
-		origin.y += gameObject.transform.localScale.y * controller.radius / 2f;
+		origin.y += gameObject.transform.localScale.y * controller.height / 2f;
 
 		for(int i = 0; i < intervals; i++)
 		{
@@ -173,7 +173,7 @@ public class PlayerController : MonoBehaviour
 					Vector3 closestPosition = Vector3.zero;
 					Vector3 playerPosition = gameObject.transform.position;
 					float distanceToClosest = Mathf.Infinity;
-					float playerRadius = gameObject.transform.localScale.x * controller.radius;
+					float halfPlayerHeight = gameObject.transform.localScale.x * controller.height;
 
 					foreach(GameObject platform in platforms)
 					{
@@ -207,7 +207,7 @@ public class PlayerController : MonoBehaviour
 					if(key == null && distanceToDoor <= doorAttractDistance && lineOfSightExists(door.collider))
 					{
 						length = doorPosition.x - playerPosition.x;
-						height = doorPosition.y - door.transform.localScale.y / 2f - playerPosition.y + 3.5f + playerRadius;
+						height = doorPosition.y - door.transform.localScale.y / 2f - playerPosition.y + 3.5f + halfPlayerHeight;
 						minJumpLength = 20f;
 						maxJumpLength = 35f;
 						targetPosition = doorPosition;
@@ -223,7 +223,7 @@ public class PlayerController : MonoBehaviour
 					else if(closestWaypoint != null)
 					{
 						length = closestPosition.x - playerPosition.x;
-						height = closestWaypoint.parent.position.y + closestWaypoint.parent.localScale.y / 2f - (playerPosition.y + 4.0f - playerRadius);
+						height = closestWaypoint.parent.position.y + closestWaypoint.parent.localScale.y / 2f - (playerPosition.y + 4.0f - halfPlayerHeight);
 						minJumpLength = 15f;
 						maxJumpLength = 25f;
 						targetPosition = closestPosition;
@@ -262,7 +262,8 @@ public class PlayerController : MonoBehaviour
 
 					if(Mathf.Abs(length) <= maxJumpLength && (height > 0f || Mathf.Abs(length) > minJumpLength))
 					{
-						Collider[] colliders = Physics.OverlapSphere(playerPosition + new Vector3(playerRadius * length / Mathf.Abs(length), -playerRadius, 0f), 1f);
+						float leadDistance = gameObject.transform.localScale.x * controller.radius * length / Mathf.Abs(length);
+						Collider[] colliders = Physics.OverlapSphere(playerPosition + new Vector3(leadDistance, -halfPlayerHeight, 0f), 1f);
 						bool onTarget = false;
 
 						jump = true;
