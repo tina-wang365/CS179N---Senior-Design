@@ -16,8 +16,6 @@ public class PlayerController : MonoBehaviour
 	GameObject skeleton;
 	//Animator anim;
 	Animation anim2;
-	GameObject door;
-	//Material material;
 
 	void Awake()
 	{
@@ -32,12 +30,6 @@ public class PlayerController : MonoBehaviour
 		skeleton = GameObject.Find("playerController/Skeleton Legacy");
 		//anim = skeleton.GetComponent<Animator> ();
 		anim2 = skeleton.GetComponent<Animation> ();
-
-		door = GameObject.Find ("level/door");
-		//var mats = door.renderer.materials;
-		//Debug.Log (mats[0]);
-		//door.renderer.Material = mats[0];
-
 	}
 
 	// collision detection between player and various objects
@@ -120,7 +112,8 @@ public class PlayerController : MonoBehaviour
 		Vector3 origin = gameObject.transform.position;
 		int intervals = 25;
 
-		origin.y += gameObject.transform.localScale.y * controller.height / 2f;
+		origin.x += gameObject.transform.localScale.x * controller.radius * 1.1f;
+		origin.y += gameObject.transform.localScale.y * controller.height * 0.75f;
 
 		for(int i = 0; i < intervals; i++)
 		{
@@ -133,15 +126,24 @@ public class PlayerController : MonoBehaviour
 			}
 		}
 
+		origin.x -= 2f * gameObject.transform.localScale.x * controller.radius * 1.1f;
+
+		for(int i = 0; i < intervals; i++)
+		{
+			float angle = (float) i * 2f * Mathf.PI / (float) intervals;
+			Vector3 direction = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f);
+			
+			if(Physics.Raycast(origin, direction, out hit) && hit.collider.Equals(collider))
+			{
+				return true;
+			}
+		}
+
 		return false;
 	}
 
 	void FixedUpdate()
 	{
-		var mats = door.renderer.materials;
-		Debug.Log (mats[1]);
-		door.renderer.material = mats [0];
-
 		//skeleton = GameObject.Find("playerController/Skeleton Legacy");
 		//skeleton.transform.position = new Vector3(controller.transform.position.x,controller.transform.position.y - gameObject.transform.localScale.y,controller.transform.position.z);
 		//Animator anim = skeleton.GetComponent<Animator> ();
@@ -219,7 +221,7 @@ public class PlayerController : MonoBehaviour
 					if(key == null && distanceToDoor <= doorAttractDistance && lineOfSightExists(door.collider))
 					{
 						length = doorPosition.x - playerPosition.x;
-						height = doorPosition.y - door.transform.localScale.y / 2f - playerPosition.y + 3.5f + halfPlayerHeight;
+						height = doorPosition.y - door.transform.localScale.y / 2f - playerPosition.y + halfPlayerHeight;
 						minJumpLength = 20f;
 						maxJumpLength = 35f;
 						targetPosition = doorPosition;
@@ -227,7 +229,7 @@ public class PlayerController : MonoBehaviour
 					else if(key != null && distanceToKey <= keyAttractDistance && lineOfSightExists(key.collider))
 					{
 						length = keyPosition.x - playerPosition.x;
-						height = keyPosition.y - playerPosition.y + 3.5f;
+						height = keyPosition.y - playerPosition.y;
 						minJumpLength = 20f;
 						maxJumpLength = 25f;
 						targetPosition = keyPosition;
