@@ -30,6 +30,15 @@ public class spawner : MonoBehaviour
 				Destroy(failed);
 			}
 		}
+
+		for(int i = 0; i < levels.Length; i++)
+		{
+			if(Application.loadedLevelName.Equals(levels[i]))
+			{
+				level = i;
+				break;
+			}
+		}
 	}
 	
 	void OnTriggerStay(Collider other)
