@@ -127,10 +127,12 @@ public class PlayerController : MonoBehaviour
 		skeleton.transform.position = new Vector3(controller.transform.position.x,controller.transform.position.y + 1.0f,controller.transform.position.z);
 		//Animator anim = skeleton.GetComponent<Animator> ();
 
-		if(Mathf.Abs(length) > 0.0f)
-			anim.SetFloat("moving", 1);
-		else
-			anim.SetFloat("moving",0);
+		anim.SetFloat ("moving", Mathf.Abs (length));
+		Debug.Log (length);
+		//if(Mathf.Abs(length) > 0.0f)
+		//	anim.SetFloat("moving", 1);
+		//else
+		//	anim.SetFloat("moving",0);
 		
 	}
 
