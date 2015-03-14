@@ -29,12 +29,21 @@ public class spawner : MonoBehaviour
 				audio[1].Play();
 				Destroy(failed);
 			}
+
+			for(int i = 0; i < levels.Length; i++)
+			{
+				if(Application.loadedLevelName.Equals(levels[i]))
+				{
+					level = i;
+					break;
+				}
+			}
 		}
 	}
 	
 	void OnTriggerStay(Collider other)
 	{
-		if(other.gameObject.name == "playerController" && (this.gameObject.name == "spike" || this.gameObject.name == "mediumSpikes3x1"))
+		if(other.gameObject.name == "playerController" && (gameObject.name == "spike" || gameObject.name == "mediumSpikes3x1" || gameObject.name == "enemy"))
 		{
 			if(GameObject.Find("You Failed") == null)
 			{
