@@ -20,7 +20,7 @@ public class PlayerController : MonoBehaviour
 	void Awake()
 	{
 		controller = gameObject.AddComponent<CharacterController>();
-		controller.height = 2.5f;
+		controller.height = 2.0f;
 		controller.center = new Vector3 (controller.center.x, controller.center.y + 1.5f, controller.center.z);
 		audio = gameObject.GetComponents<AudioSource>();
 	}
@@ -35,6 +35,11 @@ public class PlayerController : MonoBehaviour
 	// collision detection between player and various objects
 	void OnControllerColliderHit(ControllerColliderHit hit)
 	{
+//		if(hit.gameObject.name.Equals("spike"))
+//		{
+//			Debug.Log("Dead ANIMAITON");
+//			anim2.Play("Dead");
+//		}
 		if(hit.gameObject.name.Equals("Platform"))
 		{
 			if(hit.gameObject.GetComponent<MeshRenderer>().material.color.Equals(Color.white))
@@ -126,11 +131,9 @@ public class PlayerController : MonoBehaviour
 	void FixedUpdate()
 	{
 		//skeleton = GameObject.Find("playerController/Skeleton Legacy");
-		skeleton.transform.position = new Vector3(controller.transform.position.x,controller.transform.position.y + 1.0f,controller.transform.position.z);
+		skeleton.transform.position = new Vector3(controller.transform.position.x,controller.transform.position.y + 2.5f,controller.transform.position.z);
 		//Animator anim = skeleton.GetComponent<Animator> ();
-
-		//anim.SetFloat ("moving", Mathf.Abs (length));
-		//Debug.Log (length);
+		
 		if (Mathf.Abs (length) == 0.0f)
 			anim2.Play ("Idle");
 		else
@@ -154,12 +157,6 @@ public class PlayerController : MonoBehaviour
 		if (Input.GetKeyDown (KeyCode.R))
 			Application.LoadLevel (Application.loadedLevel);
 
-//		Debug.Log (Input.GetKeyDown (KeyCode.P));
-//		if (Input.GetKeyDown (KeyCode.P))
-//			Time.timeScale = 0.0f;
-//		else
-//			Time.timeScale = 1.0f;
-		
 		if(controller.isGrounded)
 		{
 			bool jump = false;
@@ -210,7 +207,7 @@ public class PlayerController : MonoBehaviour
 					if(key == null && distanceToDoor <= doorAttractDistance && lineOfSightExists(door.collider))
 					{
 						length = doorPosition.x - playerPosition.x;
-						height = doorPosition.y - door.transform.localScale.y / 2f - playerPosition.y + 4f + playerRadius;
+						height = doorPosition.y - door.transform.localScale.y / 2f - playerPosition.y + 3.5f + playerRadius;
 						minJumpLength = 20f;
 						maxJumpLength = 35f;
 						targetPosition = doorPosition;
@@ -218,7 +215,7 @@ public class PlayerController : MonoBehaviour
 					else if(key != null && distanceToKey <= keyAttractDistance && lineOfSightExists(key.collider))
 					{
 						length = keyPosition.x - playerPosition.x;
-						height = keyPosition.y - playerPosition.y + 4f;
+						height = keyPosition.y - playerPosition.y + 3.5f;
 						minJumpLength = 20f;
 						maxJumpLength = 25f;
 						targetPosition = keyPosition;
@@ -226,7 +223,7 @@ public class PlayerController : MonoBehaviour
 					else if(closestWaypoint != null)
 					{
 						length = closestPosition.x - playerPosition.x;
-						height = closestWaypoint.parent.position.y + closestWaypoint.parent.localScale.y / 2f - (playerPosition.y + 4f - playerRadius);
+						height = closestWaypoint.parent.position.y + closestWaypoint.parent.localScale.y / 2f - (playerPosition.y + 3.5f - playerRadius);
 						minJumpLength = 15f;
 						maxJumpLength = 25f;
 						targetPosition = closestPosition;

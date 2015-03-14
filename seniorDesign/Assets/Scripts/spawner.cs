@@ -9,6 +9,8 @@ public class spawner : MonoBehaviour
 	public static int level = 0;
 	public GameObject pickup;
 	private int numberOfLevels = 11;
+	//public GameObject character;
+	//private Animation animDead;
 
 	//setup public variable to represent which trigger activated
 	void Start()
@@ -17,6 +19,8 @@ public class spawner : MonoBehaviour
 
 		GameObject failed = GameObject.Find("You Failed");
 		AudioSource[] audio = gameObject.GetComponents<AudioSource>();
+		//character = GameObject.Find("playerController/Skeleton Legacy");
+		//animDead = character.GetComponent<Animation> ();
 
 		if(audio.Length > 0)
 		{
@@ -45,6 +49,8 @@ public class spawner : MonoBehaviour
 	{
 		if(other.gameObject.name == "playerController" && (gameObject.name == "spike" || gameObject.name == "mediumSpikes3x1" || gameObject.name == "enemy"))
 		{
+			//animDead.Play ("Dead");
+
 			if(GameObject.Find("You Failed") == null)
 			{
 				GameObject failed = new GameObject();
@@ -56,6 +62,7 @@ public class spawner : MonoBehaviour
 
 			Debug.Log("Spikes triggered by player!\n");
 			Debug.Log("Level = " + level + "\n");
+			//yield WaitForSeconds(3.0f);
 			Application.LoadLevel(levels[level]);
 		}
 		else if(other.gameObject.name == "playerController" && this.gameObject.name == "door")
