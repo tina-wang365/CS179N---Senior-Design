@@ -14,7 +14,8 @@ public class PlayerController : MonoBehaviour
 	float length;
 
 	GameObject skeleton;
-	Animator anim;
+	//Animator anim;
+	Animation anim2;
 
 	void Awake()
 	{
@@ -27,7 +28,8 @@ public class PlayerController : MonoBehaviour
 	void Start()
 	{
 		skeleton = GameObject.Find("playerController/Skeleton Legacy");
-		anim = skeleton.GetComponent<Animator> ();
+		//anim = skeleton.GetComponent<Animator> ();
+		anim2 = skeleton.GetComponent<Animation> ();
 	}
 
 	// collision detection between player and various objects
@@ -127,8 +129,12 @@ public class PlayerController : MonoBehaviour
 		skeleton.transform.position = new Vector3(controller.transform.position.x,controller.transform.position.y + 1.0f,controller.transform.position.z);
 		//Animator anim = skeleton.GetComponent<Animator> ();
 
-		anim.SetFloat ("moving", Mathf.Abs (length));
-		Debug.Log (length);
+		//anim.SetFloat ("moving", Mathf.Abs (length));
+		//Debug.Log (length);
+		if (Mathf.Abs (length) == 0.0f)
+			anim2.Play ("Idle");
+		else
+			anim2.Play ("Run");
 		//if(Mathf.Abs(length) > 0.0f)
 		//	anim.SetFloat("moving", 1);
 		//else
@@ -145,6 +151,14 @@ public class PlayerController : MonoBehaviour
 		float gravity = 20f;
 
 		//Animator anim = skeleton.GetComponent<Animator> ();
+		if (Input.GetKeyDown (KeyCode.R))
+			Application.LoadLevel (Application.loadedLevel);
+
+//		Debug.Log (Input.GetKeyDown (KeyCode.P));
+//		if (Input.GetKeyDown (KeyCode.P))
+//			Time.timeScale = 0.0f;
+//		else
+//			Time.timeScale = 1.0f;
 		
 		if(controller.isGrounded)
 		{
