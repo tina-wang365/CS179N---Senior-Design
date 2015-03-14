@@ -223,7 +223,7 @@ public class PlayerController : MonoBehaviour
 					else if(closestWaypoint != null)
 					{
 						length = closestPosition.x - playerPosition.x;
-						height = closestWaypoint.parent.position.y + closestWaypoint.parent.localScale.y / 2f - (playerPosition.y + 4.0f - playerRadius);
+						height = closestWaypoint.parent.position.y + closestWaypoint.parent.localScale.y / 2f - (playerPosition.y + 3.5f - playerRadius);
 						minJumpLength = 15f;
 						maxJumpLength = 25f;
 						targetPosition = closestPosition;
