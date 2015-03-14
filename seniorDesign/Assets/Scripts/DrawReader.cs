@@ -176,10 +176,10 @@ public class DrawReader : MonoBehaviour
 			}
 		}
 
-//		if(Time.timeSinceLevelLoad > 1f && !audio[1].isPlaying)
-//		{
-//			audio[1].Play();
-//		}
+		if(Time.timeSinceLevelLoad > 1f && !audio[1].isPlaying)
+		{
+			audio[1].Play();
+		}
 	}
 
 	//Disables a UI button.

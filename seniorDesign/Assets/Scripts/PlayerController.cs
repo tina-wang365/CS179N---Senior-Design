@@ -11,7 +11,6 @@ public class PlayerController : MonoBehaviour
 	private AudioSource[] audio;
 	private CharacterController controller;
 	public bool useAI;
-	private Quaternion rotation;
 
 	void Awake()
 	{
@@ -199,22 +198,6 @@ public class PlayerController : MonoBehaviour
 					}
 
 					length = Mathf.Abs(length) < 0.1f ? 0f : length;
-					//rotation.eulerAngles = transform.GetChild(0).rotation.eulerAngles;
-					//transform.GetChild(0).rotation = Quaternion.Euler(0,-90,0);
-					//Quaternion temp.eulerAngles = rotation.eulerAngles;
-					//rotation.eulerAngles.y = temp.eulerAngles.y * -1;
-					//Debug.Log (transform.GetChild(0).rotation.eulerAngles);
-					//Debug.Log (transform.GetChild(0).rotation.eulerAngles);
-
-					if(length < 0)
-					{
-						transform.GetChild(0).rotation = Quaternion.Euler(0,-90,0);
-					}
-					else
-					{
-						transform.GetChild(0).rotation = Quaternion.Euler(0,90,0);
-					}
-
 
 					if(Mathf.Abs(length) <= maxJumpLength && (height > 0f || Mathf.Abs(length) > minJumpLength))
 					{
