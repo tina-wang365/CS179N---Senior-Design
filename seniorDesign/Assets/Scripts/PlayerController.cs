@@ -16,6 +16,8 @@ public class PlayerController : MonoBehaviour
 	GameObject skeleton;
 	//Animator anim;
 	Animation anim2;
+	GameObject door;
+	//Material material;
 
 	void Awake()
 	{
@@ -30,6 +32,12 @@ public class PlayerController : MonoBehaviour
 		skeleton = GameObject.Find("playerController/Skeleton Legacy");
 		//anim = skeleton.GetComponent<Animator> ();
 		anim2 = skeleton.GetComponent<Animation> ();
+
+		door = GameObject.Find ("level/door");
+		//var mats = door.renderer.materials;
+		//Debug.Log (mats[0]);
+		//door.renderer.Material = mats[0];
+
 	}
 
 	// collision detection between player and various objects
@@ -130,6 +138,10 @@ public class PlayerController : MonoBehaviour
 
 	void FixedUpdate()
 	{
+		var mats = door.renderer.materials;
+		Debug.Log (mats[1]);
+		door.renderer.material = mats [0];
+
 		//skeleton = GameObject.Find("playerController/Skeleton Legacy");
 		//skeleton.transform.position = new Vector3(controller.transform.position.x,controller.transform.position.y - gameObject.transform.localScale.y,controller.transform.position.z);
 		//Animator anim = skeleton.GetComponent<Animator> ();
