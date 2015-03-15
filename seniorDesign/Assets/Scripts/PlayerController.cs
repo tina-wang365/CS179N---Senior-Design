@@ -247,7 +247,7 @@ public class PlayerController : MonoBehaviour
 							Destroy(closestWaypoint.gameObject);
 						}
 
-						Debug.Log(height);
+						//Debug.Log(height);
 						
 						if(height > 11f)
 						{
