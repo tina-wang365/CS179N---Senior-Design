@@ -110,29 +110,13 @@ public class PlayerController : MonoBehaviour
 	{
 		RaycastHit hit;
 		Vector3 origin = gameObject.transform.position;
-		int intervals = 25;
-
-		origin.x += gameObject.transform.localScale.x * controller.radius * 1.1f;
-		origin.y += gameObject.transform.localScale.y * controller.height * 0.75f;
+		int intervals = 360;
 
 		for(int i = 0; i < intervals; i++)
 		{
 			float angle = (float) i * 2f * Mathf.PI / (float) intervals;
 			Vector3 direction = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f);
 
-			if(Physics.Raycast(origin, direction, out hit) && hit.collider.Equals(collider))
-			{
-				return true;
-			}
-		}
-
-		origin.x -= 2f * gameObject.transform.localScale.x * controller.radius * 1.1f;
-
-		for(int i = 0; i < intervals; i++)
-		{
-			float angle = (float) i * 2f * Mathf.PI / (float) intervals;
-			Vector3 direction = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f);
-			
 			if(Physics.Raycast(origin, direction, out hit) && hit.collider.Equals(collider))
 			{
 				return true;
@@ -148,10 +132,7 @@ public class PlayerController : MonoBehaviour
 		//skeleton.transform.position = new Vector3(controller.transform.position.x,controller.transform.position.y - gameObject.transform.localScale.y,controller.transform.position.z);
 		//Animator anim = skeleton.GetComponent<Animator> ();
 
-		if (Mathf.Abs (length) == 0.0f)
-			anim2.Play ("Idle");
-		else
-			anim2.Play ("Run");
+		anim2.Play(Mathf.Abs(length) == 0.0f ? "Idle" : "Run");
 		//if(Mathf.Abs(length) > 0.0f)
 		//	anim.SetFloat("moving", 1);
 		//else
@@ -179,15 +160,23 @@ public class PlayerController : MonoBehaviour
 			{
 				//float length = 0f;
 				length = 0f;
+
+				Transform closestWaypoint = null;
+				GameObject door = GameObject.Find("door");
+				GameObject key = GameObject.Find("technique");
+				Vector3 closestPosition = Vector3.zero;
+				Vector3 playerPosition = gameObject.transform.position;
+				Vector3 doorPosition = door.collider.bounds.center;
+				Vector3 keyPosition = key != null ? key.collider.bounds.center : Vector3.zero;
+				Vector3 targetPosition = Vector3.zero;
 				float height = 0f;
+				float minJumpLength = 0f;
+				float maxJumpLength = Mathf.Infinity;
+				float halfPlayerHeight = gameObject.transform.localScale.y * controller.height / 2f;
 
 				if(platforms.Count > 0)
 				{
-					Transform closestWaypoint = null;
-					Vector3 closestPosition = Vector3.zero;
-					Vector3 playerPosition = gameObject.transform.position;
 					float distanceToClosest = Mathf.Infinity;
-					float halfPlayerHeight = gameObject.transform.localScale.y * controller.height / 2f;
 
 					foreach(GameObject platform in platforms)
 					{
@@ -204,104 +193,69 @@ public class PlayerController : MonoBehaviour
 							}
 						}
 					}
+				}
 
-					GameObject door = GameObject.Find("door");
-					GameObject key = GameObject.Find("technique");
-					Vector3 doorPosition = door.transform.position;
-					Vector3 keyPosition = key != null ? key.transform.position : Vector3.zero;
-					Vector3 targetPosition = Vector3.zero;
-					float minJumpLength = 0f;
-					float maxJumpLength = Mathf.Infinity;
-					float doorAttractDistance = 40f;
-					float keyAttractDistance = 25f;
-					float distanceToDoor = Mathf.Sqrt(Mathf.Pow(doorPosition.x - playerPosition.x, 2f) + Mathf.Pow(doorPosition.y - playerPosition.y, 2f));
-					float distanceToKey = key != null ? Mathf.Sqrt(Mathf.Pow(keyPosition.x - playerPosition.x, 2f)
-						+ Mathf.Pow(keyPosition.y - playerPosition.y, 2f)) : Mathf.Infinity;
-
-					if(key == null && distanceToDoor <= doorAttractDistance && lineOfSightExists(door.collider))
-					{
-						length = doorPosition.x - playerPosition.x;
-						height = doorPosition.y - door.transform.localScale.y / 2f - playerPosition.y + halfPlayerHeight;
-						minJumpLength = 20f;
-						maxJumpLength = 35f;
-						targetPosition = doorPosition;
-					}
-					else if(key != null && distanceToKey <= keyAttractDistance && lineOfSightExists(key.collider))
-					{
-						length = keyPosition.x - playerPosition.x;
-						height = keyPosition.y - playerPosition.y;
-						minJumpLength = 20f;
-						maxJumpLength = 25f;
-						targetPosition = keyPosition;
-					}
-					else if(closestWaypoint != null)
-					{
-						length = closestPosition.x - playerPosition.x;
-						height = closestWaypoint.parent.position.y + closestWaypoint.parent.localScale.y / 2f - (playerPosition.y - halfPlayerHeight);
-						minJumpLength = 15f;
-						maxJumpLength = 25f;
-						targetPosition = closestPosition;
-						
-						if(Mathf.Abs(length) < 0.1f)
-						{
-							Destroy(closestWaypoint.gameObject);
-						}
-
-						//Debug.Log(height);
-						
-						if(height > 11f)
-						{
-							length = 0f;
-							height = 0f;
-						}
-					}
-
-					length = Mathf.Abs(length) < 0.1f ? 0f : length;
-
-					//rotation.eulerAngles = transform.GetChild(0).rotation.eulerAngles;
-					//transform.GetChild(0).rotation = Quaternion.Euler(0,-90,0);
-					//Quaternion temp.eulerAngles = rotation.eulerAngles;
-					//rotation.eulerAngles.y = temp.eulerAngles.y * -1;
-					//Debug.Log (transform.GetChild(0).rotation.eulerAngles);
-					//Debug.Log (transform.GetChild(0).rotation.eulerAngles);
+				if(closestWaypoint != null)
+				{
+					length = closestPosition.x - playerPosition.x;
+					height = closestWaypoint.parent.position.y + closestWaypoint.parent.localScale.y / 2f - (playerPosition.y - halfPlayerHeight);
+					minJumpLength = 15f;
+					maxJumpLength = 25f;
+					targetPosition = closestPosition;
 					
-					if(length < 0)
+					if(Mathf.Abs(length) < 0.1f)
 					{
-						transform.GetChild(0).rotation = Quaternion.Euler(0,-90,0);
+						Destroy(closestWaypoint.gameObject);
 					}
-					else
+					
+					//Debug.Log(height);
+				}
+				else if(key == null && lineOfSightExists(door.collider))
+				{
+					length = doorPosition.x - playerPosition.x;
+					height = doorPosition.y - door.collider.bounds.extents.y - (playerPosition.y - halfPlayerHeight);
+					minJumpLength = 20f;
+					maxJumpLength = 35f;
+					targetPosition = doorPosition;
+
+					float leadDistance = gameObject.transform.localScale.x * controller.radius * length / Mathf.Abs(length);
+					Collider[] colliders = Physics.OverlapSphere(playerPosition + new Vector3(leadDistance, -halfPlayerHeight, 0f), 1f);
+
+					if(colliders.Length > 0)
 					{
-						transform.GetChild(0).rotation = Quaternion.Euler(0,90,0);
-					}
+						leadDistance = (2f * gameObject.transform.localScale.x * controller.radius) * length / Mathf.Abs(length);
+						colliders = Physics.OverlapSphere(playerPosition + new Vector3(leadDistance, -halfPlayerHeight, 0f), 1f);
 
-					if(Mathf.Abs(length) <= maxJumpLength && (height > 0f || Mathf.Abs(length) > minJumpLength))
-					{
-						float leadDistance = gameObject.transform.localScale.x * controller.radius * length / Mathf.Abs(length);
-						Collider[] colliders = Physics.OverlapSphere(playerPosition + new Vector3(leadDistance, -halfPlayerHeight, 0f), 1f);
-						bool onTarget = false;
-
-						jump = true;
-
-						foreach(Collider collider in colliders)
+						if(colliders.Length == 0)
 						{
-							if(!collider.gameObject.name.Contains("spike"))
-							{
-								jump = false;
-							}
-
-							if(collider.gameObject.transform.childCount > 0 && collider.gameObject.transform.GetChild(0).position.Equals(targetPosition))
-							{
-								onTarget = true;
-							}
+							leadDistance = (maxJumpLength + gameObject.transform.localScale.x * controller.radius) * length / Mathf.Abs(length);
+							colliders = Physics.OverlapSphere(playerPosition + new Vector3(leadDistance, -halfPlayerHeight, 0f), 1f);
+							length = colliders.Length > 0 ? maxJumpLength * length / Mathf.Abs(length) : length <= minJumpLength && height < 0f ? length : 0f;
 						}
-
-						jump = (jump || height > 0f) && !onTarget;
 					}
-
-					//Decreasing the jump speed to NOT over jump
-					if(height > 0f && Mathf.Abs(length) < minJumpLength)
-					{	
-						jumpSpeed *= Mathf.Abs(length) / minJumpLength;
+				}
+				else if(key != null && lineOfSightExists(key.collider))
+				{
+					length = keyPosition.x - playerPosition.x;
+					height = keyPosition.y - key.collider.bounds.extents.y - (playerPosition.y - halfPlayerHeight);
+					minJumpLength = 15f;
+					maxJumpLength = 25f;
+					targetPosition = keyPosition;
+					
+					float leadDistance = gameObject.transform.localScale.x * controller.radius * length / Mathf.Abs(length);
+					Collider[] colliders = Physics.OverlapSphere(playerPosition + new Vector3(leadDistance, -halfPlayerHeight, 0f), 1f);
+					
+					if(colliders.Length > 0)
+					{
+						leadDistance = (2f * gameObject.transform.localScale.x * controller.radius) * length / Mathf.Abs(length);
+						colliders = Physics.OverlapSphere(playerPosition + new Vector3(leadDistance, -halfPlayerHeight, 0f), 1f);
+						
+						if(colliders.Length == 0)
+						{
+							leadDistance = (maxJumpLength + gameObject.transform.localScale.x * controller.radius) * length / Mathf.Abs(length);
+							colliders = Physics.OverlapSphere(playerPosition + new Vector3(leadDistance, -halfPlayerHeight, 0f), 1f);
+							length = colliders.Length > 0 ? maxJumpLength * length / Mathf.Abs(length) : length <= minJumpLength && height < 0f ? length : 0f;
+						}
 					}
 				}
 				else
@@ -309,6 +263,45 @@ public class PlayerController : MonoBehaviour
 					length = 0f;
 					height = 0f;
 				}
+
+				length = Mathf.Abs(length) < 0.1f || height > 11f ? 0f : length;
+				height = (height < 0.1f && height > 0f) || height > 11f ? 0f : height;
+
+				//rotation.eulerAngles = transform.GetChild(0).rotation.eulerAngles;
+				//transform.GetChild(0).rotation = Quaternion.Euler(0,-90,0);
+				//Quaternion temp.eulerAngles = rotation.eulerAngles;
+				//rotation.eulerAngles.y = temp.eulerAngles.y * -1;
+				//Debug.Log (transform.GetChild(0).rotation.eulerAngles);
+				//Debug.Log (transform.GetChild(0).rotation.eulerAngles);
+				
+				transform.GetChild(0).rotation = Quaternion.Euler(0f, length == 0f ? transform.GetChild(0).rotation.eulerAngles.y : length / Mathf.Abs(length) * 90f, 0f);
+
+				if(Mathf.Abs(length) <= maxJumpLength && (height > 0f || Mathf.Abs(length) > minJumpLength))
+				{
+					float leadDistance = gameObject.transform.localScale.x * controller.radius * length / Mathf.Abs(length);
+					Collider[] colliders = Physics.OverlapSphere(playerPosition + new Vector3(leadDistance, -halfPlayerHeight, 0f), 1f);
+					bool onTarget = false;
+
+					jump = true;
+
+					foreach(Collider collider in colliders)
+					{
+						if(!collider.gameObject.name.Contains("spike"))
+						{
+							jump = false;
+						}
+
+						if(collider.gameObject.transform.childCount > 0 && collider.gameObject.transform.GetChild(0).position.Equals(targetPosition))
+						{
+							onTarget = true;
+						}
+					}
+
+					jump = (jump || height > 0f) && !onTarget;
+				}
+
+				//Decreasing the jump speed to NOT over jump
+				jumpSpeed *= height > 0f && Mathf.Abs(length) < minJumpLength ? Mathf.Abs(length) / minJumpLength : 1f;
 
 				moveDirection = new Vector3(length == 0f ? 0f : length / Mathf.Abs(length), 0f, 0f);
 //				if(Mathf.Abs(length) > 0.0f)
