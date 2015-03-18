@@ -10,12 +10,11 @@ public class PlayerController : MonoBehaviour
 	private Vector3 redDirection = Vector3.zero;
 	private AudioSource[] audio;
 	private CharacterController controller;
+	private GameObject skeleton;
+	private Animation anim2;
+	private float length;
+	private float halfPlayerHeight;
 	public bool useAI;
-	float length;
-
-	GameObject skeleton;
-	//Animator anim;
-	Animation anim2;
 
 	void Awake()
 	{
@@ -23,6 +22,7 @@ public class PlayerController : MonoBehaviour
 		controller.height = 2.0f;
 		//controller.center = new Vector3 (controller.center.x, controller.center.y + 1.5f, controller.center.z);
 		audio = gameObject.GetComponents<AudioSource>();
+		halfPlayerHeight = gameObject.transform.localScale.y * controller.height / 2f;
 	}
 
 	void Start()
@@ -126,6 +126,61 @@ public class PlayerController : MonoBehaviour
 		return false;
 	}
 
+	private bool spikeIsPresent(Collider[] colliders)
+	{
+		foreach(Collider collider in colliders)
+		{
+			if(collider.gameObject.name.Contains("spike"))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private void moveToObject(Vector3 playerPosition, float height, float minJumpLength, float maxJumpLength)
+	{
+		float leadDistance = gameObject.transform.localScale.x * controller.radius * length / Mathf.Abs(length);
+		Vector3 origin = playerPosition + new Vector3(leadDistance, -halfPlayerHeight, 0f);
+		Collider[] colliders = Physics.OverlapSphere(origin, 1f);
+		
+		//Keep walking?
+		if(colliders.Length > 0 && !spikeIsPresent(colliders))
+		{
+			leadDistance = (2f * gameObject.transform.localScale.x * controller.radius) * length / Mathf.Abs(length);
+			origin = playerPosition + new Vector3(leadDistance, -halfPlayerHeight, 0f);
+			colliders = Physics.OverlapSphere(origin, 1f);
+			
+			//Jump?
+			if(colliders.Length == 0 || (colliders.Length > 0 && spikeIsPresent(colliders)))
+			{
+				leadDistance = (maxJumpLength + gameObject.transform.localScale.x * controller.radius) * length / Mathf.Abs(length);
+				origin = playerPosition + new Vector3(leadDistance, -halfPlayerHeight, 0f);
+				colliders = Physics.OverlapSphere(origin, 1f);
+				
+				if(colliders.Length > 0 && !spikeIsPresent(colliders))
+				{
+					length = maxJumpLength * length / Mathf.Abs(length);
+				}
+				else if(colliders.Length == 0 && height < 0f)
+				{
+					RaycastHit hit;
+					Vector3 back = new Vector3(-length, 0f, 0f).normalized;
+					
+					length = (Physics.Raycast(origin, Vector3.down, out hit) && !hit.collider.gameObject.name.Contains("spike")
+					          && Physics.Raycast(origin, back, out hit) && !hit.collider.gameObject.name.Contains("spike")
+					          && Physics.Raycast(origin + new Vector3(0f, -halfPlayerHeight, 0f), back, out hit) && !hit.collider.gameObject.name.Contains("spike"))
+						|| Mathf.Abs(length) <= minJumpLength && height < 0f ? length : 0f;
+				}
+				else if(Mathf.Abs(length) > minJumpLength || height >= 0f)
+				{
+					length = 0f;
+				}
+			}
+		}
+	}
+
 	void FixedUpdate()
 	{
 		//skeleton = GameObject.Find("playerController/Skeleton Legacy");
@@ -137,7 +192,6 @@ public class PlayerController : MonoBehaviour
 		//	anim.SetFloat("moving", 1);
 		//else
 		//	anim.SetFloat("moving",0);
-		
 	}
 
 	void Update()
@@ -172,7 +226,6 @@ public class PlayerController : MonoBehaviour
 				float height = 0f;
 				float minJumpLength = 0f;
 				float maxJumpLength = Mathf.Infinity;
-				float halfPlayerHeight = gameObject.transform.localScale.y * controller.height / 2f;
 
 				if(platforms.Count > 0)
 				{
@@ -218,45 +271,17 @@ public class PlayerController : MonoBehaviour
 					maxJumpLength = 35f;
 					targetPosition = doorPosition;
 
-					float leadDistance = gameObject.transform.localScale.x * controller.radius * length / Mathf.Abs(length);
-					Collider[] colliders = Physics.OverlapSphere(playerPosition + new Vector3(leadDistance, -halfPlayerHeight, 0f), 1f);
-
-					if(colliders.Length > 0)
-					{
-						leadDistance = (2f * gameObject.transform.localScale.x * controller.radius) * length / Mathf.Abs(length);
-						colliders = Physics.OverlapSphere(playerPosition + new Vector3(leadDistance, -halfPlayerHeight, 0f), 1f);
-
-						if(colliders.Length == 0)
-						{
-							leadDistance = (maxJumpLength + gameObject.transform.localScale.x * controller.radius) * length / Mathf.Abs(length);
-							colliders = Physics.OverlapSphere(playerPosition + new Vector3(leadDistance, -halfPlayerHeight, 0f), 1f);
-							length = colliders.Length > 0 ? maxJumpLength * length / Mathf.Abs(length) : length <= minJumpLength && height < 0f ? length : 0f;
-						}
-					}
+					moveToObject(playerPosition, height, minJumpLength, maxJumpLength);
 				}
 				else if(key != null && lineOfSightExists(key.collider))
 				{
 					length = keyPosition.x - playerPosition.x;
 					height = keyPosition.y - key.collider.bounds.extents.y - (playerPosition.y - halfPlayerHeight);
 					minJumpLength = 15f;
-					maxJumpLength = 25f;
+					maxJumpLength = 20f;
 					targetPosition = keyPosition;
 					
-					float leadDistance = gameObject.transform.localScale.x * controller.radius * length / Mathf.Abs(length);
-					Collider[] colliders = Physics.OverlapSphere(playerPosition + new Vector3(leadDistance, -halfPlayerHeight, 0f), 1f);
-					
-					if(colliders.Length > 0)
-					{
-						leadDistance = (2f * gameObject.transform.localScale.x * controller.radius) * length / Mathf.Abs(length);
-						colliders = Physics.OverlapSphere(playerPosition + new Vector3(leadDistance, -halfPlayerHeight, 0f), 1f);
-						
-						if(colliders.Length == 0)
-						{
-							leadDistance = (maxJumpLength + gameObject.transform.localScale.x * controller.radius) * length / Mathf.Abs(length);
-							colliders = Physics.OverlapSphere(playerPosition + new Vector3(leadDistance, -halfPlayerHeight, 0f), 1f);
-							length = colliders.Length > 0 ? maxJumpLength * length / Mathf.Abs(length) : length <= minJumpLength && height < 0f ? length : 0f;
-						}
-					}
+					moveToObject(playerPosition, height, minJumpLength, maxJumpLength);
 				}
 				else
 				{
