@@ -4,32 +4,29 @@ using System;
 
 public class spawner : MonoBehaviour
 {
-	//setup position of where to spawn
 	private string[] levels;
 	public static int level = 0;
 	public GameObject pickup;
 	private int numberOfLevels = 11;
-	//public GameObject character;
-	//private Animation animDead;
 
-	//setup public variable to represent which trigger activated
 	void Start()
 	{
 		levels = new string[] {"level1", "level2", "level3", "level4", "level5", "level6", "level7", "level8", "level9", "level10", "endScene"};
 
+		//Finds the marker to determine whether or not the player just lost.
 		GameObject failed = GameObject.Find("You Failed");
 		AudioSource[] audio = gameObject.GetComponents<AudioSource>();
-		//character = GameObject.Find("playerController/Skeleton Legacy");
-		//animDead = character.GetComponent<Animation> ();
 
 		if(audio.Length > 0)
 		{
 			if(failed == null)
 			{
+				//Plays the level start sound if the player just started or reset the level.
 				audio[0].Play();
 			}
 			else
 			{
+				//Plays the player lost sound if the player just lost.
 				audio[1].Play();
 				Destroy(failed);
 			}
@@ -49,8 +46,7 @@ public class spawner : MonoBehaviour
 	{
 		if(other.gameObject.name == "playerController" && (gameObject.name == "spike" || gameObject.name == "mediumSpikes3x1" || gameObject.name == "enemy"))
 		{
-			//animDead.Play ("Dead");
-
+			//Creates an object that will survive reloading the level and notify the script to play the losing sound.
 			if(GameObject.Find("You Failed") == null)
 			{
 				GameObject failed = new GameObject();
@@ -60,21 +56,16 @@ public class spawner : MonoBehaviour
 				GameObject.DontDestroyOnLoad(failed);
 			}
 
-			Debug.Log("Spikes triggered by player!\n");
-			Debug.Log("Level = " + level + "\n");
-			//yield WaitForSeconds(3.0f);
+			//Reloads the level if the player touches spikes or an enemy.
 			Application.LoadLevel(levels[level]);
 		}
 		else if(other.gameObject.name == "playerController" && this.gameObject.name == "door")
 		{
-			Debug.Log ("Door triggered by player!\n");
-			Debug.Log ("Level = " + level + "\n");
-
 			if(pickup == null)
 			{
+				//This probably shouldn't be here.
 				Destroy(other.gameObject);
 			}
-
 			else if(!pickup.GetComponent<Pickup>().isActive)
 			{
 				if(level < numberOfLevels - 1)
@@ -86,12 +77,9 @@ public class spawner : MonoBehaviour
 					level = 0;
 				}
 
+				//Advances to the next level if the player has collected the key and reaches the door.
 				Application.LoadLevel(levels[level]);
 				pickup.SetActive(true);
-			}
-			else
-			{
-				Debug.Log ("The door is locked. You need a key.\n");
 			}
 		}
 	}

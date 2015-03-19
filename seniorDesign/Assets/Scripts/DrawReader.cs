@@ -23,8 +23,8 @@ public class DrawReader : MonoBehaviour
 		points = new List<Vector3>();
 		platforms = new List<GameObject>();
 		isMousePressed = false;
-		line = gameObject.AddComponent<LineRenderer>();
 		platformColor = Color.white;
+		line = gameObject.AddComponent<LineRenderer>();
 		line.material = new Material(Shader.Find("Particles/Additive"));
 		line.useWorldSpace = true;
 		audio = gameObject.GetComponents<AudioSource>();
@@ -56,23 +56,23 @@ public class DrawReader : MonoBehaviour
 		//Disables the platform's light if its initial particle animation has stopped.
 		foreach(GameObject platform in platforms)
 		{
-			if(platform.particleSystem.isStopped)
-			{
-				platform.light.range = 0f;
-			}
+			platform.light.range = platform.particleSystem.isStopped ? 0f : platform.light.range;
 		}
 
 		if(Input.GetMouseButtonDown(0))
 		{
+			Color transparentPlatformColor = new Color(platformColor.r, platformColor.g, platformColor.b, 0.75f);
+
 			isMousePressed = true;
 
-			line.SetColors(new Color(platformColor.r, platformColor.g, platformColor.b, 0.75f), new Color(platformColor.r, platformColor.g, platformColor.b, 0.75f));
+			//Sets line properties and begins playing electricity sound effect.
+			line.SetColors(transparentPlatformColor, transparentPlatformColor);
 			line.SetVertexCount(2);
 			audio[2].Play();
 		}
 		else if(Input.GetMouseButtonUp(0))
 		{
-			//Create an object if it was drawn correctly and remove the drawing.
+			//Creates a platform, resets line (and associated point) properties and stops playing the electricity sound effect.
 			createPlatform();
 			line.SetVertexCount(0);
 			points.RemoveRange(0, points.Count);
@@ -82,24 +82,21 @@ public class DrawReader : MonoBehaviour
 		}
 		else if(Input.GetMouseButtonUp(1))
 		{
-			//Cast a ray from the mouse position to determine which object was right-clicked.
+			//Casts a ray from the mouse position to determine which object was right-clicked.
 			Ray camRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 			RaycastHit hit;
 
-			//If the ray hit something, delete it.
+			//If the ray hit a platform, delete it.
 			if(Physics.Raycast(camRay, out hit) && hit.collider != null)
 			{
-				if(removeClicked(hit))
-				{
-					//Display error message?
-				}
+				removeClicked(hit);
 			}
 		}
 
-		//Add points to the drawing while the left mouse button is down.
+		//Adds points to the drawing while the left mouse button is down.
 		if(isMousePressed)
 		{
-			//Get a point from the current mouse position. The camera should be at position (0, 1, -10) and rotation (0, 0, 0).
+			//Gets a point from the current mouse position.
 			Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 			
 			mousePos.z = 0f;
@@ -131,18 +128,11 @@ public class DrawReader : MonoBehaviour
 				//Sets the line's position based on the current points.
 				line.SetPosition(0, points[0]);
 
+				//Creates lightning effect.
 				if(points.Count > 1)
 				{
 					line.SetVertexCount((int) maxDistance);
-
-					for(int i = 1; i < (int) maxDistance - 1; i++)
-					{
-						Vector2 pos =  points[0] + (points[1] - points[0]) * (float) i / maxDistance;
-						Vector2 rand = Random.insideUnitCircle + pos;
-
-						line.SetPosition(i, new Vector3(rand.x, rand.y, 0f));
-					}
-
+					lightningEffect();
 					line.SetPosition((int) maxDistance - 1, points[points.Count - 1]);
 				}
 				else
@@ -164,21 +154,29 @@ public class DrawReader : MonoBehaviour
 			platforms[0].particleSystem.Play();
 		}
 
-		//Produces lightning effect for line renderer.
+		//Produces lightning effect for line renderer between Update() calls.
 		if(points.Count > 1)
 		{
-			for(int i = 1; i < (int) maxDistance - 1; i++)
-			{
-				Vector2 pos =  points[0] + (points[1] - points[0]) * (float) i / maxDistance;
-				Vector2 rand = Random.insideUnitCircle + pos;
-				
-				line.SetPosition(i, new Vector3(rand.x, rand.y, 0f));
-			}
+			lightningEffect();
 		}
 
+		//Plays background music.
 		if(Time.timeSinceLevelLoad > 1f && !audio[1].isPlaying)
 		{
 			audio[1].Play();
+		}
+	}
+
+	//Produces lightning effect while a platform is being drawn.
+	private void lightningEffect()
+	{
+		//Creates random points inside a series of circles around points at regular intervals between the beginning and end of the drawn line.
+		for(int i = 1; i < (int) maxDistance - 1; i++)
+		{
+			Vector2 pos =  points[0] + (points[1] - points[0]) * (float) i / maxDistance;
+			Vector2 rand = Random.insideUnitCircle + pos;
+			
+			line.SetPosition(i, new Vector3(rand.x, rand.y, 0f));
 		}
 	}
 
@@ -246,16 +244,18 @@ public class DrawReader : MonoBehaviour
 		float length = Mathf.Sqrt(Mathf.Pow(adj, 2f) + Mathf.Pow(opp, 2f));
 		float angle = Mathf.Atan(opp / adj) * 180f / Mathf.PI;
 
-		//Sets platform properties.
-		platform.name = "Platform";
+		//Adds a particle system and light to the platform.
 		platform.AddComponent<ParticleSystem>();
+		platform.AddComponent<Light>();
+
+		//Sets properties of the platform and its particle system and light.
+		platform.name = "Platform";
 		platform.particleSystem.loop = false;
 		platform.particleSystem.startLifetime = 1f;
 		platform.particleSystem.emissionRate = 10f * length;
 		platform.particleSystem.playbackSpeed = 25f;
 		platform.particleSystem.startSize = 10f;
 		platform.particleSystem.startColor = platformColor;
-		platform.AddComponent<Light>();
 		platform.light.color = platformColor;
 		platform.light.type = LightType.Point;
 		platform.light.intensity = 2f;
@@ -297,7 +297,7 @@ public class DrawReader : MonoBehaviour
 		}
 		else
 		{
-			//Adds the platform to the list of platforms.
+			//Adds the platform to the list of platforms and plays an explosion sound.
 			platforms.Add(platform);
 			player.GetComponent<PlayerController>().addPlatform(platform);
 			audio[0].Play();
